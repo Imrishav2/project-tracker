@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import FormPage from './FormPage';
 import PublicSubmissionsPage from './PublicSubmissionsPage';
+import ApiTestComponent from './ApiTestComponent';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('form'); // 'form' or 'public'
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      {/* API Connection Test - Only visible during development */}
+      {import.meta.env.DEV && <ApiTestComponent />}
+      
       {/* Navigation */}
       <nav className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { submitForm } from './api';
+import API_BASE from './apiConfig';
 
 const FormPage = () => {
   const [formData, setFormData] = useState({
@@ -160,6 +161,8 @@ const FormPage = () => {
       data.append('reward_amount', parseFloat(formData.reward_amount));
       data.append(fileType, file);
       
+      console.log('Submitting form to:', `${API_BASE}/api/submit`); // Debug log
+      
       const response = await submitForm(data);
       setSuccessMessage(response.message);
       
@@ -241,6 +244,7 @@ const FormPage = () => {
                 </div>
                 <div className="ml-3">
                   <p className="text-sm text-red-700">{errors.form}</p>
+                  <p className="text-xs text-red-600 mt-1">API Base URL: {API_BASE}</p>
                 </div>
               </div>
             </div>

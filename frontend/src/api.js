@@ -53,12 +53,26 @@ export const register = async (username, password) => {
 
 // Submission API
 export const submitForm = async (formData) => {
-  const response = await api.post('/submit', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
-  return response.data;
+  try {
+    const response = await api.post('/submit', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    // Enhance error handling
+    if (error.response) {
+      // Server responded with error status
+      throw new Error(`Server error: ${error.response.data.error || error.response.statusText}`);
+    } else if (error.request) {
+      // Request was made but no response received
+      throw new Error('Network error: Unable to reach the server. Please check your connection.');
+    } else {
+      // Something else happened
+      throw new Error(`Request error: ${error.message}`);
+    }
+  }
 };
 
 export const getSubmissions = async (params = {}) => {

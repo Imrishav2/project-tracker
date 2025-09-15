@@ -40,10 +40,14 @@ const PublicSubmissionsPage = () => {
       if (agentFilter) params.ai_agent = agentFilter;
       
       const queryString = new URLSearchParams(params).toString();
-      const response = await fetch(`${API_BASE}/api/public/submissions?${queryString}`);
+      const url = `${API_BASE}/api/public/submissions?${queryString}`;
+      console.log('Fetching submissions from:', url); // Debug log
+      
+      const response = await fetch(url);
       
       if (!response.ok) {
-        throw new Error('Failed to fetch submissions');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Failed to fetch submissions: ${response.status} ${response.statusText}`);
       }
       
       const data = await response.json();
@@ -52,7 +56,7 @@ const PublicSubmissionsPage = () => {
       setCurrentPage(data.pagination.page);
     } catch (error) {
       console.error('Error fetching submissions:', error);
-      setError('An error occurred while fetching submissions. Please try again later.');
+      setError(`An error occurred while fetching submissions: ${error.message}. Please try again later.`);
     } finally {
       setLoading(false);
     }
@@ -337,6 +341,7 @@ const PublicSubmissionsPage = () => {
             </div>
             <div className="ml-3">
               <p className="text-sm text-red-700">{error}</p>
+              <p className="text-xs text-red-600 mt-1">API Base URL: {API_BASE}</p>
             </div>
           </div>
         </div>

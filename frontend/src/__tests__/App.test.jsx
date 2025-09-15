@@ -7,14 +7,14 @@ test('renders Project Completion Tracker title', () => {
   expect(titleElement).toBeInTheDocument();
 });
 
-test('renders Submission Form link', () => {
+test('renders Submit Project link', () => {
   render(<App />);
-  const formLink = screen.getByText(/Submission Form/i);
+  const formLink = screen.getByText(/Submit Project/i);
   expect(formLink).toBeInTheDocument();
 });
 
-test('renders Admin Dashboard link', () => {
+test('renders View All Projects link', () => {
   render(<App />);
-  const dashboardLink = screen.getByText(/Admin Dashboard/i);
+  const dashboardLink = screen.getByText(/View All Projects/i);
   expect(dashboardLink).toBeInTheDocument();
 });
