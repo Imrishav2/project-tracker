@@ -6,6 +6,12 @@
 [build.environment]
   NODE_VERSION = "18"
 
+[context.production.environment]
+  VITE_API_URL = "https://project-tracker-backend-<your-render-id>.onrender.com"
+
+[context.deploy-preview.environment]
+  VITE_API_URL = "https://project-tracker-backend-<your-render-id>.onrender.com"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
