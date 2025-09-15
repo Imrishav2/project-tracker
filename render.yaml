@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: project-tracker-backend
+    env: python
+    buildCommand: pip install -r project-tracker/requirements.txt
+    startCommand: cd project-tracker/backend && gunicorn --bind 0.0.0.0:$PORT wsgi:application
+    envVars:
+      - key: SECRET_KEY
+        sync: false
+      - key: JWT_SECRET_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: UPLOAD_FOLDER
+        value: uploads
