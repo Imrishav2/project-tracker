@@ -11,7 +11,7 @@ An enterprise-ready full-stack web application for tracking and managing mandato
 - **Public Submissions Page**: Advanced dashboard with filtering, sorting, and data visualization
 - **Admin Dashboard**: Table view with search, filter, and sort capabilities
 - **Database**: SQLite (dev) or PostgreSQL (prod) with SQLAlchemy
-- **Deployment**: Docker support for easy deployment
+- **Deployment**: Docker support and Render/Netlify deployment configurations
 
 ## Recent Enhancements
 
@@ -36,6 +36,7 @@ project-tracker/
 │   ├── requirements.txt # Python dependencies
 │   ├── .env            # Environment variables
 │   ├── uploads/        # Uploaded files (screenshots and projects)
+│   ├── wsgi.py         # WSGI entry point for Render deployment
 │   └── database.db     # SQLite database
 ├── frontend/
 │   ├── src/
@@ -46,6 +47,7 @@ project-tracker/
 │   ├── package.json    # Node.js dependencies
 │   └── tailwind.config.js # Tailwind CSS configuration
 ├── netlify.toml        # Netlify deployment configuration
+├── render.yaml         # Render deployment configuration
 ├── requirements.txt    # Root requirements for Render deployment
 ├── Dockerfile          # Production Docker configuration
 ├── docker-compose.yml  # Multi-container Docker setup
@@ -218,6 +220,14 @@ To run the project locally:
 
 ### Backend Deployment to Render
 
+Render deployment is simplified with two options:
+
+#### Option 1: Automatic Configuration (Recommended)
+1. Create a new Web Service on Render
+2. Connect your GitHub repository
+3. Render will automatically detect and use the `render.yaml` configuration
+
+#### Option 2: Manual Configuration
 1. Create a new Web Service on Render
 2. Connect your GitHub repository
 3. Configure the service:

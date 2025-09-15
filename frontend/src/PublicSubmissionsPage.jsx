@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const PublicSubmissionsPage = () => {
   const [submissions, setSubmissions] = useState([]);
@@ -21,7 +21,6 @@ const PublicSubmissionsPage = () => {
   // Advanced features
   const [selectedSubmission, setSelectedSubmission] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [chartData, setChartData] = useState({});
 
   const fetchSubmissions = async (page = 1) => {
     setLoading(true);
@@ -57,37 +56,6 @@ const PublicSubmissionsPage = () => {
       setLoading(false);
     }
   };
-
-  // Calculate statistics for charts
-  useEffect(() => {
-    if (submissions.length > 0) {
-      // AI distribution
-      const aiDistribution = {};
-      submissions.forEach(submission => {
-        const ai = submission.ai_used;
-        aiDistribution[ai] = (aiDistribution[ai] || 0) + 1;
-      });
-      
-      // Reward distribution by AI
-      const rewardByAi = {};
-      submissions.forEach(submission => {
-        const ai = submission.ai_used;
-        rewardByAi[ai] = (rewardByAi[ai] || 0) + submission.reward_amount;
-      });
-      
-      // Average reward by AI
-      const avgRewardByAi = {};
-      Object.keys(aiDistribution).forEach(ai => {
-        avgRewardByAi[ai] = rewardByAi[ai] / aiDistribution[ai];
-      });
-      
-      setChartData({
-        aiDistribution,
-        rewardByAi,
-        avgRewardByAi
-      });
-    }
-  }, [submissions]);
 
   useEffect(() => {
     fetchSubmissions(currentPage);
@@ -156,7 +124,6 @@ const PublicSubmissionsPage = () => {
   const aiOptions = [...new Set(submissions.map(s => s.ai_used).filter(Boolean))];
   const agentOptions = [...new Set(submissions.map(s => s.ai_agent).filter(Boolean))];
 
-  // Get file type from path
   const getFileType = (filePath) => {
     if (!filePath) return 'unknown';
     if (filePath.includes('screenshot')) return 'screenshot';
@@ -164,55 +131,42 @@ const PublicSubmissionsPage = () => {
     return 'file';
   };
 
-  // Open modal with submission details
   const openSubmissionDetails = (submission) => {
     setSelectedSubmission(submission);
     setShowModal(true);
   };
 
-  // Close modal
   const closeModal = () => {
     setShowModal(false);
     setSelectedSubmission(null);
   };
 
-  // Chart component for visualization
-  const BarChart = ({ data, title, valueFormatter = (val) => val }) => {
-    const maxValue = Math.max(...Object.values(data));
-    
-    return (
-      <div className="bg-white p-4 rounded-lg shadow-sm">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">{title}</h3>
-        <div className="space-y-3">
-          {Object.entries(data).map(([key, value]) => (
-            <div key={key}>
-              <div className="flex justify-between text-sm mb-1">
-                <span className="font-medium text-gray-700">{key}</span>
-                <span className="text-gray-500">{valueFormatter(value)}</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                  className="bg-indigo-600 h-2 rounded-full" 
-                  style={{ width: `${(value / maxValue) * 100}%` }}
-                ></div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
+  // Quick stats calculation
+  const stats = {
+    totalSubmissions: submissions.length,
+    avgReward: submissions.length > 0 
+      ? submissions.reduce((sum, s) => sum + s.reward_amount, 0) / submissions.length 
+      : 0,
+    topAi: submissions.length > 0 
+      ? Object.entries(
+          submissions.reduce((acc, s) => {
+            acc[s.ai_used] = (acc[s.ai_used] || 0) + 1;
+            return acc;
+          }, {})
+        ).sort((a, b) => b[1] - a[1])[0][0]
+      : 'N/A'
   };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="text-center mb-10">
-        <h1 className="text-3xl font-bold text-gray-900 sm:text-4xl">Project Submissions</h1>
-        <p className="mt-3 text-lg text-gray-500">Explore projects created with various AI tools</p>
+        <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Project Gallery</h1>
+        <p className="mt-3 text-lg md:text-xl text-gray-600">Explore AI-generated projects from our community</p>
       </div>
 
-      {/* Advanced Stats Section */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl shadow-lg p-6 text-white">
+      {/* Quick Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl shadow-lg p-5 text-white transform transition-transform duration-300 hover:scale-[1.02]">
           <div className="flex items-center">
             <div className="rounded-full bg-white bg-opacity-20 p-3">
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -221,12 +175,12 @@ const PublicSubmissionsPage = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-indigo-100">Total Submissions</p>
-              <p className="text-2xl font-bold">{submissions.length}</p>
+              <p className="text-2xl font-bold">{stats.totalSubmissions}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-green-500 to-teal-600 rounded-xl shadow-lg p-6 text-white">
+        <div className="bg-gradient-to-r from-green-500 to-teal-600 rounded-2xl shadow-lg p-5 text-white transform transition-transform duration-300 hover:scale-[1.02]">
           <div className="flex items-center">
             <div className="rounded-full bg-white bg-opacity-20 p-3">
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -235,16 +189,12 @@ const PublicSubmissionsPage = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-green-100">Avg. Reward</p>
-              <p className="text-2xl font-bold">
-                {submissions.length > 0 
-                  ? formatCurrency(submissions.reduce((sum, s) => sum + s.reward_amount, 0) / submissions.length) 
-                  : '$0.00'}
-              </p>
+              <p className="text-2xl font-bold">{formatCurrency(stats.avgReward)}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl shadow-lg p-6 text-white">
+        <div className="bg-gradient-to-r from-amber-500 to-orange-600 rounded-2xl shadow-lg p-5 text-white transform transition-transform duration-300 hover:scale-[1.02]">
           <div className="flex items-center">
             <div className="rounded-full bg-white bg-opacity-20 p-3">
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -253,21 +203,17 @@ const PublicSubmissionsPage = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-amber-100">Top AI</p>
-              <p className="text-2xl font-bold">
-                {Object.keys(chartData.aiDistribution || {}).sort((a, b) => 
-                  (chartData.aiDistribution[b] || 0) - (chartData.aiDistribution[a] || 0)
-                )[0] || 'N/A'}
-              </p>
+              <p className="text-2xl font-bold">{stats.topAi}</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Filters and Controls */}
-      <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+      <div className="bg-white rounded-2xl shadow-sm p-5 mb-8 border border-gray-100">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-5">
           <div className="lg:col-span-2">
-            <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">Search</label>
+            <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">Search Projects</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -277,8 +223,8 @@ const PublicSubmissionsPage = () => {
               <input
                 type="text"
                 id="search"
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Search by Lumen Name..."
+                className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+                placeholder="Search by Lumen Name, AI, or Agent..."
                 value={searchTerm}
                 onChange={handleSearch}
               />
@@ -286,14 +232,14 @@ const PublicSubmissionsPage = () => {
           </div>
 
           <div>
-            <label htmlFor="ai-filter" className="block text-sm font-medium text-gray-700 mb-1">AI Used</label>
+            <label htmlFor="ai-filter" className="block text-sm font-medium text-gray-700 mb-1">AI Model</label>
             <select
               id="ai-filter"
-              className="block w-full py-2 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="block w-full py-2.5 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
               value={aiFilter}
               onChange={handleAiFilter}
             >
-              <option value="">All AI Tools</option>
+              <option value="">All AI Models</option>
               {aiOptions.map(ai => (
                 <option key={ai} value={ai}>{ai}</option>
               ))}
@@ -304,7 +250,7 @@ const PublicSubmissionsPage = () => {
             <label htmlFor="agent-filter" className="block text-sm font-medium text-gray-700 mb-1">AI Agent</label>
             <select
               id="agent-filter"
-              className="block w-full py-2 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="block w-full py-2.5 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
               value={agentFilter}
               onChange={handleAgentFilter}
             >
@@ -319,7 +265,7 @@ const PublicSubmissionsPage = () => {
             <label htmlFor="per-page" className="block text-sm font-medium text-gray-700 mb-1">Items per page</label>
             <select
               id="per-page"
-              className="block w-full py-2 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="block w-full py-2.5 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
               value={perPage}
               onChange={(e) => setPerPage(Number(e.target.value))}
             >
@@ -336,7 +282,7 @@ const PublicSubmissionsPage = () => {
             <div className="flex items-center">
               <span className="mr-2 text-sm text-gray-700">Sort by:</span>
               <select
-                className="py-1 px-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="py-2 px-3 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
                 value={sortBy}
                 onChange={(e) => handleSort(e.target.value)}
               >
@@ -351,7 +297,11 @@ const PublicSubmissionsPage = () => {
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-lg ${viewMode === 'grid' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-500 hover:bg-gray-100'}`}
+              className={`p-2.5 rounded-lg transition-all duration-200 ${
+                viewMode === 'grid' 
+                  ? 'bg-indigo-100 text-indigo-700 shadow-inner' 
+                  : 'text-gray-500 hover:bg-gray-100'
+              }`}
               title="Grid view"
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -360,7 +310,11 @@ const PublicSubmissionsPage = () => {
             </button>
             <button
               onClick={() => setViewMode('table')}
-              className={`p-2 rounded-lg ${viewMode === 'table' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-500 hover:bg-gray-100'}`}
+              className={`p-2.5 rounded-lg transition-all duration-200 ${
+                viewMode === 'table' 
+                  ? 'bg-indigo-100 text-indigo-700 shadow-inner' 
+                  : 'text-gray-500 hover:bg-gray-100'
+              }`}
               title="Table view"
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -371,51 +325,45 @@ const PublicSubmissionsPage = () => {
         </div>
       </div>
 
-      {/* Charts Section */}
-      {Object.keys(chartData).length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <BarChart 
-            data={chartData.aiDistribution || {}} 
-            title="Submissions by AI Tool" 
-          />
-          <BarChart 
-            data={chartData.avgRewardByAi || {}} 
-            title="Average Reward by AI Tool" 
-            valueFormatter={formatCurrency}
-          />
-        </div>
-      )}
-
       {/* Error Message */}
       {error && (
-        <div className="mb-8 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-          <span className="block sm:inline">{error}</span>
+        <div className="mb-8 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          </div>
         </div>
       )}
 
       {/* Loading State */}
       {loading ? (
-        <div className="flex justify-center py-12">
+        <div className="flex justify-center py-16">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
         </div>
       ) : submissions.length === 0 ? (
-        <div className="text-center py-16 bg-white rounded-xl shadow-sm">
+        <div className="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100">
           <svg className="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
-          <h3 className="mt-4 text-lg font-medium text-gray-900">No submissions found</h3>
+          <h3 className="mt-4 text-xl font-medium text-gray-900">No projects found</h3>
           <p className="mt-2 text-gray-500">Try adjusting your search or filter criteria</p>
         </div>
       ) : viewMode === 'table' ? (
         // Table View
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th 
                     scope="col" 
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors duration-200"
                     onClick={() => handleSort('lumen_name')}
                   >
                     <div className="flex items-center">
@@ -424,14 +372,14 @@ const PublicSubmissionsPage = () => {
                     </div>
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    AI Used
+                    AI Model
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     AI Agent
                   </th>
                   <th 
                     scope="col" 
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors duration-200"
                     onClick={() => handleSort('reward_amount')}
                   >
                     <div className="flex items-center">
@@ -441,7 +389,7 @@ const PublicSubmissionsPage = () => {
                   </th>
                   <th 
                     scope="col" 
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors duration-200"
                     onClick={() => handleSort('timestamp')}
                   >
                     <div className="flex items-center">
@@ -459,19 +407,19 @@ const PublicSubmissionsPage = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {submissions.map((submission) => (
-                  <tr key={submission.id} className="hover:bg-gray-50 transition-colors">
+                  <tr key={submission.id} className="hover:bg-gray-50 transition-colors duration-200">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">{submission.lumen_name}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
                         {submission.ai_used}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {submission.ai_agent || 'N/A'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
                       {formatCurrency(submission.reward_amount)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -516,14 +464,14 @@ const PublicSubmissionsPage = () => {
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
-                  className="relative inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+                  className="relative inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors duration-200"
                 >
                   Previous
                 </button>
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
-                  className="relative inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+                  className="relative inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors duration-200"
                 >
                   Next
                 </button>
@@ -536,19 +484,19 @@ const PublicSubmissionsPage = () => {
         <div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {submissions.map((submission) => (
-              <div key={submission.id} className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-all duration-200 border border-gray-100">
+              <div key={submission.id} className="bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300 border border-gray-100 transform hover:-translate-y-1">
                 <div className="p-6">
                   <div className="flex justify-between items-start">
-                    <h3 className="text-lg font-semibold text-gray-900 truncate">{submission.lumen_name}</h3>
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 ml-2 flex-shrink-0">
+                    <h3 className="text-lg font-bold text-gray-900 truncate">{submission.lumen_name}</h3>
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800">
                       {submission.ai_used}
                     </span>
                   </div>
                   
                   <div className="mt-4 flex items-center justify-between">
                     <div>
-                      <p className="text-lg font-bold text-gray-900">{formatCurrency(submission.reward_amount)}</p>
-                      <p className="text-sm text-gray-500">{formatDate(submission.timestamp)}</p>
+                      <p className="text-xl font-bold text-gray-900">{formatCurrency(submission.reward_amount)}</p>
+                      <p className="text-xs text-gray-500">{formatDate(submission.timestamp)}</p>
                     </div>
                     
                     {submission.screenshot_path && (
@@ -556,7 +504,7 @@ const PublicSubmissionsPage = () => {
                         href={`${process.env.VITE_API_URL || 'http://localhost:5000'}/${submission.screenshot_path}`} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-full text-indigo-700 bg-indigo-100 hover:bg-indigo-200"
+                        className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-lg text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 transition-all duration-200"
                       >
                         {getFileType(submission.screenshot_path) === 'project' ? 'Project' : 'Screenshot'}
                       </a>
@@ -565,20 +513,20 @@ const PublicSubmissionsPage = () => {
                   
                   {submission.ai_agent && (
                     <div className="mt-4 pt-4 border-t border-gray-100">
-                      <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-800">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                         Agent: {submission.ai_agent}
                       </span>
                     </div>
                   )}
                   
                   <div className="mt-4">
-                    <p className="text-sm text-gray-600 line-clamp-2">{submission.prompt_text}</p>
+                    <p className="text-gray-600 text-sm line-clamp-2">{submission.prompt_text}</p>
                   </div>
                   
-                  <div className="mt-6">
+                  <div className="mt-5">
                     <button
                       onClick={() => openSubmissionDetails(submission)}
-                      className="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                      className="w-full inline-flex justify-center items-center px-4 py-2.5 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200"
                     >
                       View Details
                     </button>
@@ -599,14 +547,14 @@ const PublicSubmissionsPage = () => {
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
-                  className="relative inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+                  className="relative inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors duration-200"
                 >
                   Previous
                 </button>
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
-                  className="relative inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+                  className="relative inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors duration-200"
                 >
                   Next
                 </button>
@@ -626,12 +574,12 @@ const PublicSubmissionsPage = () => {
             
             <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
             
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <div className="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full">
+              <div className="bg-white px-5 pt-5 pb-4 sm:p-6 sm:pb-5">
                 <div className="sm:flex sm:items-start">
                   <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                    <div className="flex justify-between items-start">
-                      <h3 className="text-2xl leading-6 font-bold text-gray-900">
+                    <div className="flex justify-between items-start border-b border-gray-200 pb-4">
+                      <h3 className="text-xl leading-6 font-bold text-gray-900">
                         {selectedSubmission.lumen_name}
                       </h3>
                       <button
@@ -645,56 +593,56 @@ const PublicSubmissionsPage = () => {
                       </button>
                     </div>
                     
-                    <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm font-medium text-gray-500">AI Used</p>
-                        <p className="mt-1 text-sm text-gray-900">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">AI Model</p>
+                        <p className="mt-1">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
                             {selectedSubmission.ai_used}
                           </span>
                         </p>
                       </div>
                       
-                      <div>
-                        <p className="text-sm font-medium text-gray-500">Reward Amount</p>
-                        <p className="mt-1 text-sm text-gray-900 font-semibold">
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Reward Amount</p>
+                        <p className="mt-1 text-lg font-bold text-gray-900">
                           {formatCurrency(selectedSubmission.reward_amount)}
                         </p>
                       </div>
                       
-                      <div>
-                        <p className="text-sm font-medium text-gray-500">AI Agent</p>
-                        <p className="mt-1 text-sm text-gray-900">
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">AI Agent</p>
+                        <p className="mt-1 text-gray-900">
                           {selectedSubmission.ai_agent || 'Not specified'}
                         </p>
                       </div>
                       
-                      <div>
-                        <p className="text-sm font-medium text-gray-500">Submitted</p>
-                        <p className="mt-1 text-sm text-gray-900">
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted</p>
+                        <p className="mt-1 text-gray-900">
                           {formatDateTime(selectedSubmission.timestamp)}
                         </p>
                       </div>
                     </div>
                     
-                    <div className="mt-6">
-                      <p className="text-sm font-medium text-gray-500">Prompt Text</p>
-                      <div className="mt-1 bg-gray-50 p-4 rounded-md">
-                        <p className="text-sm text-gray-900 whitespace-pre-wrap">
+                    <div className="mt-5">
+                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Prompt Text</p>
+                      <div className="mt-2 bg-gray-50 p-4 rounded-lg">
+                        <p className="text-gray-900 whitespace-pre-wrap text-sm">
                           {selectedSubmission.prompt_text}
                         </p>
                       </div>
                     </div>
                     
                     {selectedSubmission.screenshot_path && (
-                      <div className="mt-6">
-                        <p className="text-sm font-medium text-gray-500">Uploaded File</p>
+                      <div className="mt-5">
+                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Uploaded File</p>
                         <div className="mt-2">
                           <a 
                             href={`${process.env.VITE_API_URL || 'http://localhost:5000'}/${selectedSubmission.screenshot_path}`} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 transition-all duration-200"
                           >
                             <svg className="mr-2 -ml-1 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
