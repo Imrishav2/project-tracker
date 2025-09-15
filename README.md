@@ -22,7 +22,10 @@ An enterprise-ready full-stack web application for tracking and managing mandato
   - Detailed submission modal views
   - Improved filtering and sorting options
   - Responsive grid and table views
+  - Analytics dashboard with time-based filtering
 - **Enhanced UI/UX**: Modern design with better spacing, typography, and visual hierarchy
+- **3D Visual Effects**: Advanced 3D components with hover effects, shine animations, and glassmorphism
+- **Professional Landing Page**: Attractive homepage with feature highlights and statistics
 - **Deployment Ready**: Properly configured for Render (backend) and Netlify (frontend)
 
 ## Project Structure
@@ -43,7 +46,14 @@ project-tracker/
 │   │   ├── App.jsx     # Main application component
 │   │   ├── FormPage.jsx # Submission form component
 │   │   ├── PublicSubmissionsPage.jsx # Public dashboard component
-│   │   └── api.js      # API utility functions
+│   │   ├── api.js      # API utility functions
+│   │   ├── components/ # Enhanced UI components
+│   │   │   ├── EnhancedComponents.jsx # Advanced UI components
+│   │   │   ├── EnhancedUI.module.css # 3D styling and animations
+│   │   │   ├── Button3D.jsx # 3D button component
+│   │   │   ├── LandingPage.jsx # Professional landing page
+│   │   │   └── EnhancedFormPage.jsx # Enhanced form component
+│   │   └── apiConfig.js # API configuration
 │   ├── package.json    # Node.js dependencies
 │   └── tailwind.config.js # Tailwind CSS configuration
 ├── netlify.toml        # Netlify deployment configuration
@@ -218,6 +228,12 @@ To run the project locally:
      - `VITE_API_URL` = `https://your-backend-url.onrender.com`
    - Deploy site
 
+#### Troubleshooting
+If you encounter deployment errors:
+1. Check that all dependencies in `frontend/package.json` are correctly specified
+2. Ensure the `VITE_API_URL` environment variable is set correctly
+3. Check the deployment logs for specific error messages
+
 ### Backend Deployment to Render
 
 Render deployment is simplified with two options:
@@ -240,6 +256,12 @@ Render deployment is simplified with two options:
      - `UPLOAD_FOLDER` = uploads
 
 4. Deploy the service
+
+#### Troubleshooting
+If you encounter deployment errors:
+1. Check that the root `requirements.txt` file contains only the dependencies used in your application
+2. Ensure all dependencies are compatible with Render's Python environment
+3. Check the deployment logs for specific error messages
 
 ### Docker Deployment
 
