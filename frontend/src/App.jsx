@@ -2,37 +2,38 @@ import React, { useState } from 'react';
 import FormPage from './FormPage';
 import PublicSubmissionsPage from './PublicSubmissionsPage';
 import ApiTestComponent from './ApiTestComponent';
+import styles from './components/EnhancedUI.module.css';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('form'); // 'form' or 'public'
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
       {/* API Connection Test - Only visible during development */}
       {import.meta.env.DEV && <ApiTestComponent />}
       
       {/* Navigation */}
-      <nav className="bg-white shadow-sm">
+      <nav className={styles.nav3d}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20">
             <div className="flex">
               <div className="flex-shrink-0 flex items-center">
                 <div className="flex items-center">
-                  <div className="bg-indigo-600 rounded-lg p-2">
+                  <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl p-2 shadow-lg">
                     <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                   </div>
-                  <h1 className="ml-3 text-2xl font-bold text-gray-900">Project Completion Tracker</h1>
+                  <h1 className={`ml-3 text-2xl font-bold ${styles.gradientText}`}>Project Completion Tracker</h1>
                 </div>
               </div>
               <div className="hidden sm:ml-10 sm:flex sm:space-x-8">
                 <button
                   onClick={() => setCurrentPage('form')}
-                  className={`inline-flex items-center px-1 pt-1 border-b-2 text-base font-medium transition-colors duration-200 ${
+                  className={`inline-flex items-center px-4 py-2 rounded-xl text-base font-medium transition-all duration-300 ${
                     currentPage === 'form'
-                      ? 'border-indigo-500 text-gray-900'
-                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                      ? 'bg-white shadow-lg text-indigo-700 border-2 border-indigo-200 transform -translate-y-0.5'
+                      : 'text-gray-600 hover:text-indigo-700 hover:bg-white hover:bg-opacity-50'
                   }`}
                 >
                   <svg className="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -42,10 +43,10 @@ function App() {
                 </button>
                 <button
                   onClick={() => setCurrentPage('public')}
-                  className={`inline-flex items-center px-1 pt-1 border-b-2 text-base font-medium transition-colors duration-200 ${
+                  className={`inline-flex items-center px-4 py-2 rounded-xl text-base font-medium transition-all duration-300 ${
                     currentPage === 'public'
-                      ? 'border-indigo-500 text-gray-900'
-                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                      ? 'bg-white shadow-lg text-indigo-700 border-2 border-indigo-200 transform -translate-y-0.5'
+                      : 'text-gray-600 hover:text-indigo-700 hover:bg-white hover:bg-opacity-50'
                   }`}
                 >
                   <svg className="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -72,7 +73,7 @@ function App() {
           <div className="md:flex md:items-center md:justify-between">
             <div className="flex justify-center md:justify-start">
               <div className="flex items-center">
-                <div className="bg-indigo-600 rounded-lg p-1">
+                <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg p-1 shadow-md">
                   <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>

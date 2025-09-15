@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { submitForm } from './api';
 import API_BASE from './apiConfig';
+import styles from './components/EnhancedUI.module.css';
+import Button3D from './components/Button3D';
 
 const FormPage = () => {
   const [formData, setFormData] = useState({
@@ -207,44 +209,44 @@ const FormPage = () => {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="bg-white shadow-xl rounded-2xl overflow-hidden">
+      <div className={styles.card3d}>
         <div className="px-6 py-8 sm:p-10">
           <div className="text-center mb-10">
-            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-indigo-100 mb-4">
+            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-r from-indigo-100 to-purple-100 mb-4 shadow-lg">
               <svg className="h-8 w-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <h2 className="text-3xl font-bold text-gray-900">Project Submission</h2>
+            <h2 className={`text-3xl font-bold ${styles.gradientText}`}>Project Submission</h2>
             <p className="mt-2 text-lg text-gray-600">Share your AI-generated projects with the community</p>
           </div>
           
           {successMessage && (
-            <div className="mb-8 bg-green-50 border-l-4 border-green-500 p-4 rounded-lg">
+            <div className={`${styles.successCard3d} mb-8 p-4 rounded-xl`}>
               <div className="flex">
                 <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+                  <svg className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
                 </div>
                 <div className="ml-3">
-                  <p className="text-sm text-green-700">{successMessage}</p>
+                  <p className="text-sm text-white">{successMessage}</p>
                 </div>
               </div>
             </div>
           )}
           
           {errors.form && (
-            <div className="mb-8 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+            <div className={`${styles.errorCard3d} mb-8 p-4 rounded-xl`}>
               <div className="flex">
                 <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                  <svg className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                   </svg>
                 </div>
                 <div className="ml-3">
-                  <p className="text-sm text-red-700">{errors.form}</p>
-                  <p className="text-xs text-red-600 mt-1">API Base URL: {API_BASE}</p>
+                  <p className="text-sm text-white">{errors.form}</p>
+                  <p className="text-xs text-white text-opacity-80 mt-1">API Base URL: {API_BASE}</p>
                 </div>
               </div>
             </div>
@@ -264,7 +266,7 @@ const FormPage = () => {
                   name="lumen_name"
                   value={formData.lumen_name}
                   onChange={handleChange}
-                  className={`mt-2 block w-full px-4 py-3 border ${errors.lumen_name ? 'border-red-300' : 'border-gray-300'} rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200`}
+                  className={`${styles.input3d} mt-2 block w-full ${errors.lumen_name ? 'border-red-500' : ''}`}
                   placeholder="e.g., AI_Explorer_2025"
                 />
                 {errors.lumen_name && <p className="mt-1 text-sm text-red-600">{errors.lumen_name}</p>}
@@ -276,7 +278,7 @@ const FormPage = () => {
                   Reward Amount <span className="text-red-500">*</span>
                 </label>
                 <p className="text-sm text-gray-600">Enter the reward amount for this submission (minimum $0.01)</p>
-                <div className="mt-2 relative rounded-xl shadow-sm">
+                <div className="mt-2 relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <span className="text-gray-500 sm:text-sm font-medium">$</span>
                   </div>
@@ -288,7 +290,7 @@ const FormPage = () => {
                     min="0.01"
                     value={formData.reward_amount}
                     onChange={handleChange}
-                    className={`block w-full pl-10 pr-12 py-3 border ${errors.reward_amount ? 'border-red-300' : 'border-gray-300'} rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200`}
+                    className={`${styles.input3d} block w-full pl-10 pr-12 ${errors.reward_amount ? 'border-red-500' : ''}`}
                     placeholder="0.00"
                   />
                   <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
@@ -311,9 +313,9 @@ const FormPage = () => {
                 <button
                   type="button"
                   onClick={() => handleFileTypeChange('screenshot')}
-                  className={`flex items-center justify-center px-6 py-4 rounded-xl text-base font-medium transition-all duration-200 ${
+                  className={`flex items-center justify-center px-6 py-4 rounded-xl text-base font-medium transition-all duration-300 ${
                     fileType === 'screenshot'
-                      ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg transform -translate-y-0.5'
+                      ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-xl transform -translate-y-1'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
                   }`}
                 >
@@ -323,9 +325,9 @@ const FormPage = () => {
                 <button
                   type="button"
                   onClick={() => handleFileTypeChange('project')}
-                  className={`flex items-center justify-center px-6 py-4 rounded-xl text-base font-medium transition-all duration-200 ${
+                  className={`flex items-center justify-center px-6 py-4 rounded-xl text-base font-medium transition-all duration-300 ${
                     fileType === 'project'
-                      ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg transform -translate-y-0.5'
+                      ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-xl transform -translate-y-1'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
                   }`}
                 >
@@ -346,12 +348,12 @@ const FormPage = () => {
                   : 'Upload your complete project folder as a ZIP file (up to 50MB)'}
               </p>
               <div 
-                className={`mt-3 flex justify-center px-6 pt-8 pb-10 border-2 border-dashed rounded-xl transition-all duration-200 ${
+                className={`${styles.fileUpload3d} mt-3 flex justify-center px-6 pt-8 pb-10 transition-all duration-300 ${
                   dragActive 
-                    ? 'border-indigo-500 bg-indigo-50' 
+                    ? styles.dragActive 
                     : errors.screenshot 
-                      ? 'border-red-300 bg-red-50' 
-                      : 'border-gray-300 bg-gray-50 hover:bg-gray-100'
+                      ? 'border-red-500 bg-red-50' 
+                      : ''
                 }`}
                 onDragEnter={handleDrag}
                 onDragLeave={handleDrag}
@@ -367,7 +369,7 @@ const FormPage = () => {
                   <div className="flex flex-col sm:flex-row sm:items-center text-sm text-gray-600">
                     <label
                       htmlFor="screenshot"
-                      className="relative cursor-pointer bg-white rounded-lg font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500 px-4 py-2 border border-gray-300"
+                      className="relative cursor-pointer bg-white rounded-lg font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500 px-4 py-2 border border-gray-300 shadow-sm"
                     >
                       <span className="font-semibold">Upload a file</span>
                       <input
@@ -390,7 +392,7 @@ const FormPage = () => {
               </div>
               {errors.screenshot && <p className="mt-2 text-sm text-red-600">{errors.screenshot}</p>}
               {file && (
-                <div className="mt-3 bg-green-50 rounded-xl p-4 flex items-center">
+                <div className="mt-3 bg-green-50 rounded-xl p-4 flex items-center shadow-sm">
                   <svg className="h-5 w-5 text-green-500 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
@@ -418,7 +420,7 @@ const FormPage = () => {
                 rows={6}
                 value={formData.prompt_text}
                 onChange={handleChange}
-                className={`mt-2 block w-full px-4 py-3 border ${errors.prompt_text ? 'border-red-300' : 'border-gray-300'} rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200`}
+                className={`${styles.textarea3d} mt-2 block w-full ${errors.prompt_text ? 'border-red-500' : ''}`}
                 placeholder="Describe the prompt you used to generate this project..."
               />
               {errors.prompt_text && <p className="mt-1 text-sm text-red-600">{errors.prompt_text}</p>}
@@ -437,7 +439,7 @@ const FormPage = () => {
                     name="ai_used"
                     value={formData.ai_used}
                     onChange={handleChange}
-                    className="block w-full px-4 py-3 bg-white border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+                    className={`${styles.select3d} block w-full`}
                   >
                     <option value="GPT-5">GPT-5</option>
                     <option value="Claude">Claude</option>
@@ -460,7 +462,7 @@ const FormPage = () => {
                   name="ai_agent"
                   value={formData.ai_agent}
                   onChange={handleChange}
-                  className={`mt-2 block w-full px-4 py-3 border ${errors.ai_agent ? 'border-red-300' : 'border-gray-300'} rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200`}
+                  className={`${styles.input3d} mt-2 block w-full ${errors.ai_agent ? 'border-red-500' : ''}`}
                   placeholder="e.g., Cursor, GitHub Copilot, etc."
                 />
                 {errors.ai_agent && <p className="mt-1 text-sm text-red-600">{errors.ai_agent}</p>}
@@ -469,23 +471,20 @@ const FormPage = () => {
             
             {/* Submit Button */}
             <div className="pt-6">
-              <button
+              <Button3D
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex justify-center py-4 px-6 border border-transparent rounded-xl shadow-sm text-lg font-medium text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-lg"
+                className="w-full flex justify-center py-4 px-6 text-lg font-medium"
               >
                 {isLoading ? (
                   <>
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Submitting...
+                    <div className={styles.spinner3d}></div>
+                    <span className="ml-3">Submitting...</span>
                   </>
                 ) : (
                   'Submit Project'
                 )}
-              </button>
+              </Button3D>
             </div>
           </form>
         </div>

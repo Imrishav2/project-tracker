@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import API_BASE from './apiConfig';
+import styles from './components/EnhancedUI.module.css';
+import Button3D from './components/Button3D';
 
 const PublicSubmissionsPage = () => {
   const [submissions, setSubmissions] = useState([]);
@@ -165,13 +167,13 @@ const PublicSubmissionsPage = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="text-center mb-10">
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Project Gallery</h1>
+        <h1 className={`text-3xl md:text-4xl font-bold ${styles.gradientText}`}>Project Gallery</h1>
         <p className="mt-3 text-lg md:text-xl text-gray-600">Explore AI-generated projects from our community</p>
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
-        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl shadow-lg p-5 text-white transform transition-transform duration-300 hover:scale-[1.02]">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className={`${styles.statsCard3d} p-6 text-white transform transition-transform duration-300 hover:scale-105`}>
           <div className="flex items-center">
             <div className="rounded-full bg-white bg-opacity-20 p-3">
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -179,13 +181,13 @@ const PublicSubmissionsPage = () => {
               </svg>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-indigo-100">Total Submissions</p>
+              <p className="text-sm font-medium text-white text-opacity-80">Total Submissions</p>
               <p className="text-2xl font-bold">{stats.totalSubmissions}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-green-500 to-teal-600 rounded-2xl shadow-lg p-5 text-white transform transition-transform duration-300 hover:scale-[1.02]">
+        <div className={`${styles.statsCard3d} p-6 text-white transform transition-transform duration-300 hover:scale-105`} style={{background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)'}}>
           <div className="flex items-center">
             <div className="rounded-full bg-white bg-opacity-20 p-3">
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -193,13 +195,13 @@ const PublicSubmissionsPage = () => {
               </svg>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-green-100">Avg. Reward</p>
+              <p className="text-sm font-medium text-white text-opacity-80">Avg. Reward</p>
               <p className="text-2xl font-bold">{formatCurrency(stats.avgReward)}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-amber-500 to-orange-600 rounded-2xl shadow-lg p-5 text-white transform transition-transform duration-300 hover:scale-[1.02]">
+        <div className={`${styles.statsCard3d} p-6 text-white transform transition-transform duration-300 hover:scale-105`} style={{background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'}}>
           <div className="flex items-center">
             <div className="rounded-full bg-white bg-opacity-20 p-3">
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -207,7 +209,7 @@ const PublicSubmissionsPage = () => {
               </svg>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-amber-100">Top AI</p>
+              <p className="text-sm font-medium text-white text-opacity-80">Top AI</p>
               <p className="text-2xl font-bold">{stats.topAi}</p>
             </div>
           </div>
@@ -215,7 +217,7 @@ const PublicSubmissionsPage = () => {
       </div>
 
       {/* Filters and Controls */}
-      <div className="bg-white rounded-2xl shadow-sm p-5 mb-8 border border-gray-100">
+      <div className={`${styles.card3d} p-6 mb-8`}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-5">
           <div className="lg:col-span-2">
             <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">Search Projects</label>
@@ -228,7 +230,7 @@ const PublicSubmissionsPage = () => {
               <input
                 type="text"
                 id="search"
-                className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+                className={`${styles.input3d} block w-full pl-10 pr-3`}
                 placeholder="Search by Lumen Name, AI, or Agent..."
                 value={searchTerm}
                 onChange={handleSearch}
@@ -240,7 +242,7 @@ const PublicSubmissionsPage = () => {
             <label htmlFor="ai-filter" className="block text-sm font-medium text-gray-700 mb-1">AI Model</label>
             <select
               id="ai-filter"
-              className="block w-full py-2.5 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+              className={`${styles.select3d} block w-full`}
               value={aiFilter}
               onChange={handleAiFilter}
             >
@@ -255,7 +257,7 @@ const PublicSubmissionsPage = () => {
             <label htmlFor="agent-filter" className="block text-sm font-medium text-gray-700 mb-1">AI Agent</label>
             <select
               id="agent-filter"
-              className="block w-full py-2.5 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+              className={`${styles.select3d} block w-full`}
               value={agentFilter}
               onChange={handleAgentFilter}
             >
@@ -270,7 +272,7 @@ const PublicSubmissionsPage = () => {
             <label htmlFor="per-page" className="block text-sm font-medium text-gray-700 mb-1">Items per page</label>
             <select
               id="per-page"
-              className="block w-full py-2.5 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+              className={`${styles.select3d} block w-full`}
               value={perPage}
               onChange={(e) => setPerPage(Number(e.target.value))}
             >
@@ -287,7 +289,7 @@ const PublicSubmissionsPage = () => {
             <div className="flex items-center">
               <span className="mr-2 text-sm text-gray-700">Sort by:</span>
               <select
-                className="py-2 px-3 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+                className={`${styles.select3d} py-2 px-3 text-sm`}
                 value={sortBy}
                 onChange={(e) => handleSort(e.target.value)}
               >
@@ -332,16 +334,16 @@ const PublicSubmissionsPage = () => {
 
       {/* Error Message */}
       {error && (
-        <div className="mb-8 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+        <div className={`${styles.errorCard3d} mb-8 p-4 rounded-xl`}>
           <div className="flex">
             <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+              <svg className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
               </svg>
             </div>
             <div className="ml-3">
-              <p className="text-sm text-red-700">{error}</p>
-              <p className="text-xs text-red-600 mt-1">API Base URL: {API_BASE}</p>
+              <p className="text-sm text-white">{error}</p>
+              <p className="text-xs text-white text-opacity-80 mt-1">API Base URL: {API_BASE}</p>
             </div>
           </div>
         </div>
@@ -350,10 +352,10 @@ const PublicSubmissionsPage = () => {
       {/* Loading State */}
       {loading ? (
         <div className="flex justify-center py-16">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+          <div className={styles.spinner3d}></div>
         </div>
       ) : submissions.length === 0 ? (
-        <div className="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100">
+        <div className={`${styles.card3d} text-center py-20`}>
           <svg className="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
@@ -362,7 +364,7 @@ const PublicSubmissionsPage = () => {
         </div>
       ) : viewMode === 'table' ? (
         // Table View
-        <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
+        <div className={`${styles.card3d} overflow-hidden`}>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -467,20 +469,22 @@ const PublicSubmissionsPage = () => {
                 <span className="font-medium">{totalPages}</span>
               </div>
               <div className="flex space-x-2">
-                <button
+                <Button3D
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
-                  className="relative inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors duration-200"
+                  variant="secondary"
+                  className="px-3 py-1.5 text-sm"
                 >
                   Previous
-                </button>
-                <button
+                </Button3D>
+                <Button3D
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
-                  className="relative inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors duration-200"
+                  variant="secondary"
+                  className="px-3 py-1.5 text-sm"
                 >
                   Next
-                </button>
+                </Button3D>
               </div>
             </div>
           )}
@@ -490,7 +494,7 @@ const PublicSubmissionsPage = () => {
         <div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {submissions.map((submission) => (
-              <div key={submission.id} className="bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300 border border-gray-100 transform hover:-translate-y-1">
+              <div key={submission.id} className={`${styles.card3d} overflow-hidden transform hover:-translate-y-2`}>
                 <div className="p-6">
                   <div className="flex justify-between items-start">
                     <h3 className="text-lg font-bold text-gray-900 truncate">{submission.lumen_name}</h3>
@@ -510,7 +514,7 @@ const PublicSubmissionsPage = () => {
                         href={`${API_BASE}/${submission.screenshot_path}`} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-lg text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 transition-all duration-200"
+                        className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-lg text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-md"
                       >
                         {getFileType(submission.screenshot_path) === 'project' ? 'Project' : 'Screenshot'}
                       </a>
@@ -530,12 +534,13 @@ const PublicSubmissionsPage = () => {
                   </div>
                   
                   <div className="mt-5">
-                    <button
+                    <Button3D
                       onClick={() => openSubmissionDetails(submission)}
-                      className="w-full inline-flex justify-center items-center px-4 py-2.5 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200"
+                      variant="secondary"
+                      className="w-full justify-center px-4 py-2.5 text-sm"
                     >
                       View Details
-                    </button>
+                    </Button3D>
                   </div>
                 </div>
               </div>
@@ -550,20 +555,22 @@ const PublicSubmissionsPage = () => {
                 <span className="font-medium">{totalPages}</span>
               </div>
               <div className="flex space-x-2">
-                <button
+                <Button3D
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
-                  className="relative inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors duration-200"
+                  variant="secondary"
+                  className="px-3 py-1.5 text-sm"
                 >
                   Previous
-                </button>
-                <button
+                </Button3D>
+                <Button3D
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
-                  className="relative inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors duration-200"
+                  variant="secondary"
+                  className="px-3 py-1.5 text-sm"
                 >
                   Next
-                </button>
+                </Button3D>
               </div>
             </div>
           )}
@@ -580,7 +587,7 @@ const PublicSubmissionsPage = () => {
             
             <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
             
-            <div className="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full">
+            <div className={`${styles.modal3d} inline-block align-bottom text-left overflow-hidden transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full`}>
               <div className="bg-white px-5 pt-5 pb-4 sm:p-6 sm:pb-5">
                 <div className="sm:flex sm:items-start">
                   <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
@@ -648,7 +655,7 @@ const PublicSubmissionsPage = () => {
                             href={`${API_BASE}/${selectedSubmission.screenshot_path}`} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 transition-all duration-200"
+                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-md"
                           >
                             <svg className="mr-2 -ml-1 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />

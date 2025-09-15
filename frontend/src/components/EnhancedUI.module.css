@@ -1,0 +1,333 @@
+/* Enhanced UI Styles for Classy, 3D Responsive Design */
+
+/* 3D Button Effects */
+.btn3d {
+  position: relative;
+  transform: translateZ(0);
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 4px 6px rgba(0, 0, 0, 0.1),
+    0 1px 3px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border: none;
+  outline: none;
+  cursor: pointer;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn3d:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 12px rgba(0, 0, 0, 0.15),
+    0 2px 4px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.btn3d:active {
+  transform: translateY(0);
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.08),
+    inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.btn3d-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-size: 16px;
+}
+
+.btn3d-secondary {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-size: 16px;
+}
+
+.btn3d-success {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  color: white;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-size: 16px;
+}
+
+/* Enhanced Card Styles */
+.card3d {
+  background: linear-gradient(145deg, #ffffff, #f0f0f0);
+  border-radius: 16px;
+  box-shadow: 
+    0 10px 25px rgba(0, 0, 0, 0.1),
+    0 5px 15px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(10px);
+}
+
+.card3d:hover {
+  transform: translateY(-5px);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.15),
+    0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Gradient Text */
+.gradientText {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+}
+
+/* Enhanced Input Styles */
+.input3d {
+  background: linear-gradient(145deg, #ffffff, #f8f8f8);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 12px 16px;
+  transition: all 0.3s ease;
+  box-shadow: 
+    inset 0 2px 4px rgba(0, 0, 0, 0.05),
+    0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.input3d:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 
+    inset 0 2px 4px rgba(0, 0, 0, 0.05),
+    0 0 0 3px rgba(102, 126, 234, 0.2);
+  transform: scale(1.01);
+}
+
+/* Enhanced Select Styles */
+.select3d {
+  background: linear-gradient(145deg, #ffffff, #f8f8f8);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 12px 16px;
+  transition: all 0.3s ease;
+  box-shadow: 
+    inset 0 2px 4px rgba(0, 0, 0, 0.05),
+    0 1px 3px rgba(0, 0, 0, 0.05);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 12px center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+  padding-right: 40px;
+}
+
+.select3d:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 
+    inset 0 2px 4px rgba(0, 0, 0, 0.05),
+    0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+/* Enhanced Textarea Styles */
+.textarea3d {
+  background: linear-gradient(145deg, #ffffff, #f8f8f8);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 12px 16px;
+  transition: all 0.3s ease;
+  box-shadow: 
+    inset 0 2px 4px rgba(0, 0, 0, 0.05),
+    0 1px 3px rgba(0, 0, 0, 0.05);
+  resize: vertical;
+}
+
+.textarea3d:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 
+    inset 0 2px 4px rgba(0, 0, 0, 0.05),
+    0 0 0 3px rgba(102, 126, 234, 0.2);
+  transform: scale(1.005);
+}
+
+/* Enhanced Navigation */
+.nav3d {
+  background: linear-gradient(145deg, #ffffff, #f8f8f8);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    0 2px 4px rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Enhanced Stats Cards */
+.statsCard3d {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  box-shadow: 
+    0 10px 25px rgba(0, 0, 0, 0.2),
+    0 5px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  border: none;
+  color: white;
+  transform: translateZ(0);
+}
+
+.statsCard3d:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.25),
+    0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Enhanced Modal */
+.modal3d {
+  background: linear-gradient(145deg, #ffffff, #f8f8f8);
+  border-radius: 20px;
+  box-shadow: 
+    0 25px 50px rgba(0, 0, 0, 0.25),
+    0 10px 20px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(10px);
+  transform: translateZ(0);
+}
+
+/* Enhanced File Upload Area */
+.fileUpload3d {
+  background: linear-gradient(145deg, #ffffff, #f8f8f8);
+  border: 2px dashed #667eea;
+  border-radius: 16px;
+  transition: all 0.3s ease;
+  box-shadow: 
+    inset 0 2px 4px rgba(0, 0, 0, 0.05),
+    0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.fileUpload3d:hover {
+  background: linear-gradient(145deg, #f8f9ff, #f0f2ff);
+  border-color: #764ba2;
+  transform: scale(1.01);
+}
+
+.fileUpload3d.dragActive {
+  background: linear-gradient(145deg, #eef2ff, #e0e7ff);
+  border-color: #43e97b;
+  box-shadow: 
+    inset 0 4px 8px rgba(0, 0, 0, 0.1),
+    0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Design Enhancements */
+@media (max-width: 768px) {
+  .btn3d {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+  
+  .card3d {
+    border-radius: 12px;
+  }
+  
+  .statsCard3d {
+    border-radius: 12px;
+  }
+  
+  .modal3d {
+    border-radius: 16px;
+  }
+  
+  .input3d, .select3d, .textarea3d {
+    padding: 10px 14px;
+    border-radius: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn3d {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+  
+  .card3d {
+    border-radius: 10px;
+  }
+  
+  .statsCard3d {
+    border-radius: 10px;
+  }
+  
+  .modal3d {
+    border-radius: 14px;
+  }
+  
+  .input3d, .select3d, .textarea3d {
+    padding: 8px 12px;
+    border-radius: 8px;
+  }
+}
+
+/* Animation Classes */
+.fadeIn {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.slideInUp {
+  animation: slideInUp 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translate3d(0, 20px, 0);
+    opacity: 0;
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+}
+
+/* Enhanced Loading Spinner */
+.spinner3d {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(102, 126, 234, 0.2);
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin3d 1s linear infinite;
+}
+
+@keyframes spin3d {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Enhanced Error Messages */
+.errorCard3d {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+  border-radius: 12px;
+  box-shadow: 
+    0 4px 12px rgba(255, 107, 107, 0.3),
+    0 2px 6px rgba(255, 107, 107, 0.2);
+  color: white;
+  border: none;
+}
+
+/* Enhanced Success Messages */
+.successCard3d {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  border-radius: 12px;
+  box-shadow: 
+    0 4px 12px rgba(67, 233, 123, 0.3),
+    0 2px 6px rgba(67, 233, 123, 0.2);
+  color: white;
+  border: none;
+}
