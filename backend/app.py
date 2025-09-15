@@ -21,7 +21,16 @@ def create_app():
     
     # Configuration
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key')
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///database.db')
+    
+    # Use PostgreSQL in production, SQLite in development
+    database_url = os.environ.get('DATABASE_URL')
+    if database_url:
+        # Render provides DATABASE_URL for PostgreSQL
+        app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+    else:
+        # Local development - use SQLite
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+    
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['UPLOAD_FOLDER'] = os.environ.get('UPLOAD_FOLDER', 'uploads')
     app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max file size (increased for project files)
