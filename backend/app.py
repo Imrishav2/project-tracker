@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from models import db, Submission
 from auth import auth_bp, jwt_required, get_current_user
@@ -42,6 +42,11 @@ def create_app():
     @app.route('/health')
     def health_check():
         return jsonify({'status': 'healthy', 'timestamp': datetime.now().isoformat()})
+    
+    # Serve uploaded files
+    @app.route('/uploads/<path:filename>')
+    def uploaded_file(filename):
+        return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
     
     # Routes
     @app.route('/api/submit', methods=['POST'])
