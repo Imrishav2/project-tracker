@@ -7,10 +7,23 @@ An enterprise-ready full-stack web application for tracking and managing mandato
 - **Frontend**: React + TailwindCSS with responsive design
 - **Backend**: Python Flask with SQLAlchemy ORM
 - **Authentication**: Secure admin login with JWT tokens
-- **File Upload**: Screenshot submission with validation
+- **File Upload**: Screenshot and ZIP folder submission with validation (up to 50MB)
+- **Public Submissions Page**: Advanced dashboard with filtering, sorting, and data visualization
 - **Admin Dashboard**: Table view with search, filter, and sort capabilities
 - **Database**: SQLite (dev) or PostgreSQL (prod) with SQLAlchemy
 - **Deployment**: Docker support for easy deployment
+
+## Recent Enhancements
+
+- **Folder Upload Support**: Users can now upload entire project folders as ZIP files
+- **AI Agent Tracking**: New field to track which AI agent was used for project generation
+- **Advanced Public Dashboard**: Enhanced public submissions page with:
+  - Interactive data visualizations and charts
+  - Detailed submission modal views
+  - Improved filtering and sorting options
+  - Responsive grid and table views
+- **Enhanced UI/UX**: Modern design with better spacing, typography, and visual hierarchy
+- **Deployment Ready**: Properly configured for Render (backend) and Netlify (frontend)
 
 ## Project Structure
 
@@ -22,16 +35,18 @@ project-tracker/
 │   ├── models.py       # Database models
 │   ├── requirements.txt # Python dependencies
 │   ├── .env            # Environment variables
-│   ├── uploads/        # Uploaded screenshots
+│   ├── uploads/        # Uploaded files (screenshots and projects)
 │   └── database.db     # SQLite database
 ├── frontend/
 │   ├── src/
 │   │   ├── App.jsx     # Main application component
 │   │   ├── FormPage.jsx # Submission form component
-│   │   ├── DashboardPage.jsx # Admin dashboard component
+│   │   ├── PublicSubmissionsPage.jsx # Public dashboard component
 │   │   └── api.js      # API utility functions
 │   ├── package.json    # Node.js dependencies
 │   └── tailwind.config.js # Tailwind CSS configuration
+├── netlify.toml        # Netlify deployment configuration
+├── requirements.txt    # Root requirements for Render deployment
 ├── Dockerfile          # Production Docker configuration
 ├── docker-compose.yml  # Multi-container Docker setup
 ├── README.md           # This file
@@ -126,8 +141,9 @@ project-tracker/
 - `POST /api/login` - Login and get JWT token
 
 ### Submissions
-- `POST /api/submit` - Submit a new project (requires form data)
+- `POST /api/submit` - Submit a new project (requires form data with screenshot or ZIP file)
 - `GET /api/submissions` - Get all submissions (requires admin authentication)
+- `GET /api/public/submissions` - Get public submissions (no authentication required)
 
 ## Environment Variables
 
@@ -191,9 +207,13 @@ To run the project locally:
 2. Deploy to Netlify:
    - Go to [Netlify](https://netlify.com)
    - Create a new site
-   - Select the `frontend/dist` folder as the publish directory
+   - Select your repository
+   - Set build settings:
+     - Base directory: `frontend`
+     - Build command: `npm run build`
+     - Publish directory: `dist`
    - Set environment variables:
-     - `REACT_APP_API_BASE_URL` = `https://your-backend-url.onrender.com/api`
+     - `VITE_API_URL` = `https://your-backend-url.onrender.com`
    - Deploy site
 
 ### Backend Deployment to Render
@@ -201,8 +221,8 @@ To run the project locally:
 1. Create a new Web Service on Render
 2. Connect your GitHub repository
 3. Configure the service:
-   - Build command: `pip install -r backend/requirements.txt`
-   - Start command: `gunicorn --bind 0.0.0.0:$PORT wsgi:app`
+   - Build command: `pip install -r requirements.txt`
+   - Start command: `cd backend && gunicorn --bind 0.0.0.0:$PORT wsgi:application`
    - Environment variables:
      - `SECRET_KEY` = your-secret-key
      - `JWT_SECRET_KEY` = your-jwt-secret-key
