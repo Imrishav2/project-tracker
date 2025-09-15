@@ -7,10 +7,10 @@
   NODE_VERSION = "18"
 
 [context.production.environment]
-  VITE_API_URL = "https://project-tracker-backend-<your-render-id>.onrender.com"
+  VITE_API_URL = "https://project-tracker-0ahq.onrender.com"
 
 [context.deploy-preview.environment]
-  VITE_API_URL = "https://project-tracker-backend-<your-render-id>.onrender.com"
+  VITE_API_URL = "https://project-tracker-0ahq.onrender.com"
 
 [[redirects]]
   from = "/*"
