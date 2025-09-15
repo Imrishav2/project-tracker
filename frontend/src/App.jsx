@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import FormPage from './FormPage';
 import PublicSubmissionsPage from './PublicSubmissionsPage';
-import ApiTest from './ApiTest';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState('form'); // 'form', 'public', or 'api-test'
+  const [currentPage, setCurrentPage] = useState('form'); // 'form' or 'public'
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -50,16 +49,6 @@ function App() {
                   </svg>
                   View All Projects
                 </button>
-                <button
-                  onClick={() => setCurrentPage('api-test')}
-                  className={`inline-flex items-center px-1 pt-1 border-b-2 text-base font-medium transition-colors duration-200 ${
-                    currentPage === 'api-test'
-                      ? 'border-indigo-500 text-gray-900'
-                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                  }`}
-                >
-                  API Test
-                </button>
               </div>
             </div>
           </div>
@@ -70,7 +59,6 @@ function App() {
         <div className="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8">
           {currentPage === 'form' && <FormPage />}
           {currentPage === 'public' && <PublicSubmissionsPage />}
-          {currentPage === 'api-test' && <ApiTest />}
         </div>
       </main>
       
