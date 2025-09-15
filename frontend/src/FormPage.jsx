@@ -157,6 +157,7 @@ const FormPage = () => {
       data.append('prompt_text', formData.prompt_text);
       data.append('ai_used', formData.ai_used);
       data.append('ai_agent', formData.ai_agent);
+      data.append('reward_amount', parseFloat(formData.reward_amount));
       data.append(fileType, file);
       
       const response = await submitForm(data);

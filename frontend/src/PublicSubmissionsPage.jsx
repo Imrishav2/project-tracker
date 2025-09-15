@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import API_BASE from './apiConfig';
 
 const PublicSubmissionsPage = () => {
   const [submissions, setSubmissions] = useState([]);
@@ -39,7 +40,7 @@ const PublicSubmissionsPage = () => {
       if (agentFilter) params.ai_agent = agentFilter;
       
       const queryString = new URLSearchParams(params).toString();
-      const response = await fetch(`${process.env.VITE_API_URL || 'http://localhost:5000'}/api/public/submissions?${queryString}`);
+      const response = await fetch(`${API_BASE}/api/public/submissions?${queryString}`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch submissions');
@@ -428,7 +429,7 @@ const PublicSubmissionsPage = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {submission.screenshot_path ? (
                         <a 
-                          href={`${process.env.VITE_API_URL || 'http://localhost:5000'}/${submission.screenshot_path}`} 
+                          href={`${API_BASE}/${submission.screenshot_path}`} 
                           target="_blank" 
                           rel="noopener noreferrer"
                           className="text-indigo-600 hover:text-indigo-900 font-medium"
@@ -501,7 +502,7 @@ const PublicSubmissionsPage = () => {
                     
                     {submission.screenshot_path && (
                       <a 
-                        href={`${process.env.VITE_API_URL || 'http://localhost:5000'}/${submission.screenshot_path}`} 
+                        href={`${API_BASE}/${submission.screenshot_path}`} 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-lg text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 transition-all duration-200"
@@ -639,7 +640,7 @@ const PublicSubmissionsPage = () => {
                         <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Uploaded File</p>
                         <div className="mt-2">
                           <a 
-                            href={`${process.env.VITE_API_URL || 'http://localhost:5000'}/${selectedSubmission.screenshot_path}`} 
+                            href={`${API_BASE}/${selectedSubmission.screenshot_path}`} 
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 transition-all duration-200"

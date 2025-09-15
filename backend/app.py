@@ -28,6 +28,7 @@ def create_app():
     
     # Initialize extensions
     db.init_app(app)
+    # Configure CORS to allow all origins for all routes (appropriate for a public API)
     CORS(app)
     
     # Create upload folder if it doesn't exist
