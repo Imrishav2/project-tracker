@@ -1,0 +1,223 @@
+# Project Completion Tracker
+
+An enterprise-ready full-stack web application for tracking and managing mandatory project completion submissions from contributors.
+
+## Features
+
+- **Frontend**: React + TailwindCSS with responsive design
+- **Backend**: Python Flask with SQLAlchemy ORM
+- **Authentication**: Secure admin login with JWT tokens
+- **File Upload**: Screenshot submission with validation
+- **Admin Dashboard**: Table view with search, filter, and sort capabilities
+- **Database**: SQLite (dev) or PostgreSQL (prod) with SQLAlchemy
+- **Deployment**: Docker support for easy deployment
+
+## Project Structure
+
+```
+project-tracker/
+├── backend/
+│   ├── app.py          # Main Flask application
+│   ├── auth.py         # Authentication module
+│   ├── models.py       # Database models
+│   ├── requirements.txt # Python dependencies
+│   ├── .env            # Environment variables
+│   ├── uploads/        # Uploaded screenshots
+│   └── database.db     # SQLite database
+├── frontend/
+│   ├── src/
+│   │   ├── App.jsx     # Main application component
+│   │   ├── FormPage.jsx # Submission form component
+│   │   ├── DashboardPage.jsx # Admin dashboard component
+│   │   └── api.js      # API utility functions
+│   ├── package.json    # Node.js dependencies
+│   └── tailwind.config.js # Tailwind CSS configuration
+├── Dockerfile          # Production Docker configuration
+├── docker-compose.yml  # Multi-container Docker setup
+├── README.md           # This file
+├── novelty.md          # Project uniqueness documentation
+└── LICENSE             # License information
+```
+
+## Installation
+
+### Prerequisites
+
+- Python 3.8+
+- Node.js 16+
+- Docker (optional, for containerized deployment)
+
+### Backend Setup
+
+1. Navigate to the backend directory:
+   ```bash
+   cd backend
+   ```
+
+2. Create a virtual environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. Install Python dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. Set up environment variables in `.env`:
+   ```bash
+   cp .env.example .env
+   # Edit .env with your values
+   ```
+
+5. Initialize the database:
+   ```bash
+   python app.py
+   ```
+
+### Frontend Setup
+
+1. Navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
+
+2. Install Node.js dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+## Running with Docker
+
+### Development Mode
+
+1. Start both frontend and backend services:
+   ```bash
+   docker-compose up --build
+   ```
+
+2. Access the application:
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:5000
+
+### Production Mode
+
+1. Use the production docker-compose file:
+   ```bash
+   docker-compose -f docker-compose.prod.yml up --build
+   ```
+
+2. For production deployment, set environment variables:
+   ```bash
+   SECRET_KEY=your-production-secret-key
+   JWT_SECRET_KEY=your-production-jwt-secret-key
+   ```
+
+## API Endpoints
+
+### Authentication
+- `POST /api/register` - Register new admin user
+- `POST /api/login` - Login and get JWT token
+
+### Submissions
+- `POST /api/submit` - Submit a new project (requires form data)
+- `GET /api/submissions` - Get all submissions (requires admin authentication)
+
+## Environment Variables
+
+Create a `.env` file in the backend directory with these variables:
+
+```env
+SECRET_KEY=your-secret-key-here
+DATABASE_URL=sqlite:///database.db
+UPLOAD_FOLDER=uploads
+JWT_SECRET_KEY=your-jwt-secret-key-here
+```
+
+## Testing
+
+### Backend Tests
+
+```bash
+cd backend
+python -m pytest tests/
+```
+
+### Frontend Tests
+
+```bash
+cd frontend
+npm run test
+```
+
+## Deployment
+
+### Running Locally
+
+To run the project locally:
+
+1. Start the backend:
+   ```bash
+   cd backend
+   pip install -r requirements.txt
+   python app.py
+   ```
+
+2. Start the frontend:
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+
+3. Access the application:
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:5000
+
+### Frontend Deployment to Netlify
+
+1. Build the frontend:
+   ```bash
+   cd frontend
+   npm run build
+   ```
+
+2. Deploy to Netlify:
+   - Go to [Netlify](https://netlify.com)
+   - Create a new site
+   - Select the `frontend/dist` folder as the publish directory
+   - Set environment variables:
+     - `REACT_APP_API_BASE_URL` = `https://your-backend-url.onrender.com/api`
+   - Deploy site
+
+### Backend Deployment to Render
+
+1. Create a new Web Service on Render
+2. Connect your GitHub repository
+3. Configure the service:
+   - Build command: `pip install -r backend/requirements.txt`
+   - Start command: `gunicorn --bind 0.0.0.0:$PORT wsgi:app`
+   - Environment variables:
+     - `SECRET_KEY` = your-secret-key
+     - `JWT_SECRET_KEY` = your-jwt-secret-key
+     - `DATABASE_URL` = sqlite:///database.db (or PostgreSQL for production)
+     - `UPLOAD_FOLDER` = uploads
+
+4. Deploy the service
+
+### Docker Deployment
+
+The project includes Docker support for easy deployment:
+
+- Development: `docker-compose up --build`
+- Production: `docker-compose -f docker-compose.prod.yml up --build`
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  # Backend service with PostgreSQL
+  backend:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - SECRET_KEY=${SECRET_KEY}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - DATABASE_URL=postgresql://projecttracker:projecttrackerpass@db:5432/projecttracker
+      - UPLOAD_FOLDER=uploads
+    volumes:
+      - uploads_data:/app/uploads
+    networks:
+      - app-network
+    depends_on:
+      - db
+
+  # PostgreSQL database
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: projecttracker
+      POSTGRES_PASSWORD: projecttrackerpass
+      POSTGRES_DB: projecttracker
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+  uploads_data:
+
+networks:
+  app-network:
+    driver: bridge
