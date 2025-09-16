@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import API_BASE from './apiConfig';
 import ProjectDetailsModal from './components/ProjectDetailsModal';
 
@@ -122,21 +122,23 @@ const PublicSubmissionsPage = () => {
     return 'file';
   };
 
-  // Quick stats calculation
-  const stats = {
-    totalSubmissions: submissions.length,
-    avgReward: submissions.length > 0 
-      ? submissions.reduce((sum, s) => sum + s.reward_amount, 0) / submissions.length 
-      : 0,
-    topAi: submissions.length > 0 
-      ? Object.entries(
-          submissions.reduce((acc, s) => {
-            acc[s.ai_used] = (acc[s.ai_used] || 0) + 1;
-            return acc;
-          }, {})
-        ).sort((a, b) => b[1] - a[1])[0][0]
-      : 'N/A'
-  };
+  // Quick stats calculation with useMemo for performance
+  const stats = useMemo(() => {
+    return {
+      totalSubmissions: submissions.length,
+      avgReward: submissions.length > 0 
+        ? submissions.reduce((sum, s) => sum + s.reward_amount, 0) / submissions.length 
+        : 0,
+      topAi: submissions.length > 0 
+        ? Object.entries(
+            submissions.reduce((acc, s) => {
+              acc[s.ai_used] = (acc[s.ai_used] || 0) + 1;
+              return acc;
+            }, {})
+          ).sort((a, b) => b[1] - a[1])[0][0]
+        : 'N/A'
+    };
+  }, [submissions]);
 
   // Function to open project details modal
   const openProjectDetails = (submission) => {
@@ -165,7 +167,7 @@ const PublicSubmissionsPage = () => {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl p-6 text-white shadow-lg">
+        <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl p-6 text-white shadow-lg hover:shadow-xl transition-shadow duration-300">
           <div className="flex items-center">
             <div className="rounded-full bg-white bg-opacity-20 p-3">
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -179,7 +181,7 @@ const PublicSubmissionsPage = () => {
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl p-6 text-white shadow-lg">
+        <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl p-6 text-white shadow-lg hover:shadow-xl transition-shadow duration-300">
           <div className="flex items-center">
             <div className="rounded-full bg-white bg-opacity-20 p-3">
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -193,7 +195,7 @@ const PublicSubmissionsPage = () => {
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl p-6 text-white shadow-lg">
+        <div className="bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl p-6 text-white shadow-lg hover:shadow-xl transition-shadow duration-300">
           <div className="flex items-center">
             <div className="rounded-full bg-white bg-opacity-20 p-3">
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -222,7 +224,7 @@ const PublicSubmissionsPage = () => {
               <input
                 type="text"
                 id="search"
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
                 placeholder="Search by Lumen Name, AI, or Agent..."
                 value={searchTerm}
                 onChange={handleSearch}
@@ -234,7 +236,7 @@ const PublicSubmissionsPage = () => {
             <label htmlFor="ai-filter" className="block text-sm font-medium text-gray-700 mb-1">AI Model</label>
             <select
               id="ai-filter"
-              className="block w-full py-2 px-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+              className="block w-full py-2 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
               value={aiFilter}
               onChange={handleAiFilter}
             >
@@ -249,7 +251,7 @@ const PublicSubmissionsPage = () => {
             <label htmlFor="agent-filter" className="block text-sm font-medium text-gray-700 mb-1">AI Agent</label>
             <select
               id="agent-filter"
-              className="block w-full py-2 px-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+              className="block w-full py-2 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
               value={agentFilter}
               onChange={handleAgentFilter}
             >
@@ -264,7 +266,7 @@ const PublicSubmissionsPage = () => {
             <label htmlFor="per-page" className="block text-sm font-medium text-gray-700 mb-1">Items per page</label>
             <select
               id="per-page"
-              className="block w-full py-2 px-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+              className="block w-full py-2 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
               value={perPage}
               onChange={(e) => setPerPage(Number(e.target.value))}
             >
@@ -272,6 +274,7 @@ const PublicSubmissionsPage = () => {
               <option value="9">9</option>
               <option value="12">12</option>
               <option value="18">18</option>
+              <option value="24">24</option>
             </select>
           </div>
         </div>
@@ -281,7 +284,7 @@ const PublicSubmissionsPage = () => {
             <div className="flex items-center">
               <span className="mr-2 text-sm text-gray-700">Sort by:</span>
               <select
-                className="py-2 px-3 text-sm border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                className="py-2 px-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
                 value={sortBy}
                 onChange={(e) => handleSort(e.target.value)}
               >
@@ -436,7 +439,7 @@ const PublicSubmissionsPage = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <button
                           onClick={() => openProjectDetails(submission)}
-                          className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                          className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md"
                         >
                           View Details
                         </button>
@@ -477,7 +480,7 @@ const PublicSubmissionsPage = () => {
       ) : (
         // Grid View
         <div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {submissions.map((submission) => {
               // Count total files (primary + additional)
               const totalFiles = 1 + (Array.isArray(submission.additional_screenshots) 
@@ -485,27 +488,20 @@ const PublicSubmissionsPage = () => {
                 : (submission.additional_screenshots ? 1 : 0));
               
               return (
-                <div key={submission.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200">
-                  <div className="p-6">
+                <div key={submission.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                  <div className="p-5">
                     <div className="flex justify-between items-start">
                       <h3 className="text-lg font-bold text-gray-900 truncate">{submission.lumen_name}</h3>
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800">
                         {submission.ai_used}
                       </span>
                     </div>
                     
-                    <div className="mt-4 flex items-center justify-between">
+                    <div className="mt-3 flex items-center justify-between">
                       <div>
                         <p className="text-xl font-bold text-gray-900">{formatCurrency(submission.reward_amount)}</p>
                         <p className="text-xs text-gray-500">{formatDate(submission.timestamp)}</p>
                       </div>
-                      
-                      <button
-                        onClick={() => openProjectDetails(submission)}
-                        className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-lg text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md"
-                      >
-                        View Details
-                      </button>
                     </div>
                     
                     {/* Screenshot Preview - Enhanced User Experience */}
@@ -516,14 +512,14 @@ const PublicSubmissionsPage = () => {
                           <img 
                             src={`${API_BASE}/${submission.screenshot_path}`} 
                             alt="Project preview"
-                            className="w-full h-32 object-cover"
+                            className="w-full h-36 object-cover transition-transform duration-300 hover:scale-105"
                             onError={(e) => {
                               e.target.style.display = 'none';
                             }}
                           />
                         </div>
                       ) : (
-                        <div className="rounded-lg overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center h-32 mb-2">
+                        <div className="rounded-lg overflow-hidden border border-gray-200 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center h-36 mb-2">
                           <svg className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                           </svg>
@@ -539,7 +535,7 @@ const PublicSubmissionsPage = () => {
                                 <img 
                                   src={`${API_BASE}/${screenshot}`} 
                                   alt={`Additional preview ${index + 1}`}
-                                  className="w-full h-full object-cover"
+                                  className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                                   onError={(e) => {
                                     e.target.parentElement.style.display = 'none';
                                   }}
@@ -547,14 +543,14 @@ const PublicSubmissionsPage = () => {
                               </div>
                             ))
                           ) : (
-                            <div className="rounded-lg overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center w-16 h-16">
+                            <div className="rounded-lg overflow-hidden border border-gray-200 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center w-16 h-16">
                               <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                               </svg>
                             </div>
                           )}
                           {Array.isArray(submission.additional_screenshots) && submission.additional_screenshots.length > 3 && (
-                            <div className="rounded-lg overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center w-16 h-16">
+                            <div className="rounded-lg overflow-hidden border border-gray-200 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center w-16 h-16">
                               <span className="text-xs text-gray-500">+{submission.additional_screenshots.length - 3}</span>
                             </div>
                           )}
@@ -563,20 +559,29 @@ const PublicSubmissionsPage = () => {
                     </div>
                     
                     {submission.ai_agent && (
-                      <div className="mt-4 pt-4 border-t border-gray-100">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                      <div className="mt-3 pt-3 border-t border-gray-100">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800">
                           Agent: {submission.ai_agent}
                         </span>
                       </div>
                     )}
                     
                     {/* File Info */}
-                    <div className="mt-4 text-sm text-gray-600">
+                    <div className="mt-3 text-sm text-gray-600">
                       <span className="font-medium">{totalFiles}</span> file{totalFiles !== 1 ? 's' : ''} attached
                     </div>
                     
-                    <div className="mt-4">
+                    <div className="mt-3">
                       <p className="text-gray-600 text-sm line-clamp-2">{submission.prompt_text}</p>
+                    </div>
+                    
+                    <div className="mt-4">
+                      <button
+                        onClick={() => openProjectDetails(submission)}
+                        className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md"
+                      >
+                        View Details
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -595,14 +600,14 @@ const PublicSubmissionsPage = () => {
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-1.5 text-sm font-medium rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                  className="px-4 py-2 text-sm font-medium rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                 >
                   Previous
                 </button>
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
-                  className="px-3 py-1.5 text-sm font-medium rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                  className="px-4 py-2 text-sm font-medium rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                 >
                   Next
                 </button>
