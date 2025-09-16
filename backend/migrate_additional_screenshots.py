@@ -1,24 +1,20 @@
 #!/usr/bin/env python3
 """
-Migration script to add the additional_screenshots column to the submissions table
+Migration script to add additional_screenshots column to submissions table
 """
-import os
 import sys
+import os
 import logging
-from dotenv import load_dotenv
 
-# Add backend directory to Python path
+# Add the backend directory to the path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
-# Load environment variables
-load_dotenv()
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 def migrate_database():
-    """Add additional_screenshots column if it doesn't exist"""
+    """Add missing columns to the submissions table"""
     logger.info("Starting database migration...")
     
     try:
@@ -28,39 +24,34 @@ def migrate_database():
         app = create_app()
         
         with app.app_context():
-            # Check if we're using SQLite or PostgreSQL
-            database_url = app.config.get('SQLALCHEMY_DATABASE_URI', '')
-            logger.info(f"Database URL: {database_url}")
-            
-            # For both SQLite and PostgreSQL, we'll try to add the column
-            # SQLAlchemy will handle the differences
-            
-            # Try to add the ai_agent column first (for older databases)
+            # Try to add ai_agent column
             try:
                 db.session.execute(db.text("ALTER TABLE submissions ADD COLUMN ai_agent VARCHAR(50)"))
                 logger.info("Added ai_agent column to submissions table")
             except Exception as e:
-                # Column might already exist
                 logger.info(f"ai_agent column already exists or not needed: {str(e)}")
             
-            # Try to add the additional_screenshots column
+            # Try to add additional_screenshots column
             try:
                 db.session.execute(db.text("ALTER TABLE submissions ADD COLUMN additional_screenshots TEXT"))
                 logger.info("Added additional_screenshots column to submissions table")
             except Exception as e:
-                # Column might already exist
                 logger.info(f"additional_screenshots column already exists or not needed: {str(e)}")
             
             # Commit the changes
             db.session.commit()
-            logger.info("Migration completed successfully")
-            print("Migration completed successfully")
-                
+            logger.info("Database migration completed successfully")
+            
+        return True
     except Exception as e:
-        logger.error(f"Error during migration: {e}")
+        logger.error(f"Error during database migration: {str(e)}")
         logger.exception("Full traceback:")
-        print(f"Error during migration: {e}")
-        # Don't exit with error code as this might be normal for existing columns
+        return False
 
 if __name__ == "__main__":
-    migrate_database()
+    success = migrate_database()
+    if success:
+        logger.info("✅ Database migration completed successfully!")
+    else:
+        logger.error("❌ Database migration failed!")
+    sys.exit(0 if success else 1)
