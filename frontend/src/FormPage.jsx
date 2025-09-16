@@ -325,6 +325,35 @@ const SimpleFormPage = () => {
                 <span className="ml-2 truncate">{file.name}</span>
               </div>
             )}
+            
+            {/* File Preview Section */}
+            {file && fileType === 'screenshot' && (
+              <div className="mt-4">
+                <h3 className="text-sm font-medium text-gray-700 mb-2">Preview:</h3>
+                <div className="border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
+                  <img 
+                    src={URL.createObjectURL(file)} 
+                    alt="Preview" 
+                    className="w-full h-48 object-contain"
+                  />
+                </div>
+              </div>
+            )}
+            
+            {file && fileType === 'project' && (
+              <div className="mt-4">
+                <h3 className="text-sm font-medium text-gray-700 mb-2">Project File:</h3>
+                <div className="border border-gray-200 rounded-lg p-4 bg-gray-50 flex items-center">
+                  <svg className="h-8 w-8 text-gray-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <div>
+                    <p className="font-medium text-gray-900">{file.name}</p>
+                    <p className="text-sm text-gray-500">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
           
           {/* Prompt Text */}
@@ -363,6 +392,7 @@ const SimpleFormPage = () => {
                 <option value="Claude">Claude</option>
                 <option value="LLaMA">LLaMA</option>
                 <option value="Gemini">Gemini</option>
+                <option value="Perplexity">Perplexity</option>
                 <option value="Other">Other</option>
               </select>
             </div>

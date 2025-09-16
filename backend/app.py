@@ -76,7 +76,7 @@ def create_app():
                 return jsonify({'error': 'Invalid reward amount'}), 400
             
             # Validate AI used
-            valid_ai_options = ['GPT-5', 'Claude', 'LLaMA', 'Other']
+            valid_ai_options = ['GPT-5', 'Claude', 'LLaMA', 'Gemini', 'Perplexity', 'Other']
             if request.form['ai_used'] not in valid_ai_options:
                 return jsonify({'error': 'Invalid AI option selected'}), 400
             
