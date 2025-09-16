@@ -527,7 +527,7 @@ const PublicSubmissionsPage = () => {
                     
                     {/* Screenshot Preview - Enhanced User Experience */}
                     <div className="mt-4">
-                      {/* Primary screenshot */}
+                      {/* Primary file display - handle both screenshots and project files */}
                       {getFileType(submission.screenshot_path) === 'screenshot' ? (
                         <div className="rounded-lg overflow-hidden border border-gray-200 mb-2">
                           <img 
@@ -539,6 +539,20 @@ const PublicSubmissionsPage = () => {
                               e.target.style.display = 'none';
                             }}
                           />
+                        </div>
+                      ) : getFileType(submission.screenshot_path) === 'project' ? (
+                        <div className="rounded-lg overflow-hidden border border-gray-200 bg-gradient-to-br from-blue-50 to-indigo-50 flex flex-col items-center justify-center h-36 mb-2 p-4">
+                          <svg className="h-12 w-12 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          <p className="mt-2 text-sm font-medium text-blue-700">Project ZIP File</p>
+                          <a 
+                            href={`${API_BASE}/uploads/${getFilenameFromPath(submission.screenshot_path)}`} 
+                            download
+                            className="mt-2 inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                          >
+                            Download
+                          </a>
                         </div>
                       ) : (
                         <div className="rounded-lg overflow-hidden border border-gray-200 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center h-36 mb-2">
@@ -554,15 +568,24 @@ const PublicSubmissionsPage = () => {
                           {Array.isArray(submission.additional_screenshots) ? (
                             submission.additional_screenshots.slice(0, 3).map((screenshot, index) => (
                               <div key={index} className="rounded-lg overflow-hidden border border-gray-200 w-16 h-16">
-                                <img 
-                                  src={`${API_BASE}/uploads/${getFilenameFromPath(screenshot)}`} 
-                                  alt={`Additional preview ${index + 1}`}
-                                  className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                                  onError={(e) => {
-                                    console.error('Thumbnail load error for:', e.target.src);
-                                    e.target.style.display = 'none';
-                                  }}
-                                />
+                                {getFileType(screenshot) === 'screenshot' ? (
+                                  <img 
+                                    src={`${API_BASE}/uploads/${getFilenameFromPath(screenshot)}`} 
+                                    alt={`Additional preview ${index + 1}`}
+                                    className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                                    onError={(e) => {
+                                      console.error('Thumbnail load error for:', e.target.src);
+                                      e.target.style.display = 'none';
+                                    }}
+                                  />
+                                ) : (
+                                  <div className="w-full h-full bg-blue-50 flex flex-col items-center justify-center p-1">
+                                    <svg className="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    <span className="text-xs text-blue-600 mt-1">ZIP</span>
+                                  </div>
+                                )}
                               </div>
                             ))
                           ) : (

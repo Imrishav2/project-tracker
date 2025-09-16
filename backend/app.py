@@ -24,28 +24,33 @@ def create_app():
         # Configuration
         app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key')
         
+        # Debug logging
+        logger.info(f"DATABASE_URL from environment: {os.environ.get('DATABASE_URL', 'Not set')}")
+        logger.info(f"DB_ISSUES from environment: {os.environ.get('DB_ISSUES', 'Not set')}")
+        
         # Check if we have database issues flag set
         db_issues = os.environ.get('DB_ISSUES', 'false').lower() == 'true'
         
-        if db_issues:
+        # Use PostgreSQL in production, SQLite in development
+        database_url = os.environ.get('DATABASE_URL')
+        if database_url and not db_issues:
+            # Render provides DATABASE_URL for PostgreSQL
+            # Handle different URL formats
+            if database_url.startswith('postgres://'):
+                # Convert postgres:// to postgresql:// for SQLAlchemy
+                database_url = database_url.replace('postgres://', 'postgresql://', 1)
+            app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+            logger.info(f"Using PostgreSQL database: {database_url}")
+        elif db_issues:
             logger.warning("Database issues detected, using minimal configuration")
             # Use SQLite in-memory database for debugging
             app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
         else:
-            # Use PostgreSQL in production, SQLite in development
-            database_url = os.environ.get('DATABASE_URL')
-            if database_url:
-                # Render provides DATABASE_URL for PostgreSQL
-                # Handle different URL formats
-                if database_url.startswith('postgres://'):
-                    # Convert postgres:// to postgresql:// for SQLAlchemy
-                    database_url = database_url.replace('postgres://', 'postgresql://', 1)
-                app.config['SQLALCHEMY_DATABASE_URI'] = database_url
-                logger.info(f"Using PostgreSQL database: {database_url}")
-            else:
-                # Local development - use SQLite
-                app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-                logger.info("Using SQLite database for development")
+            # Local development - use SQLite with absolute path
+            backend_dir = os.path.dirname(os.path.abspath(__file__))
+            db_path = os.path.join(backend_dir, 'database.db')
+            app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+            logger.info(f"Using SQLite database for development: {db_path}")
         
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         # Fix the upload folder path to be an absolute path
