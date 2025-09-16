@@ -3,7 +3,7 @@ services:
     name: project-tracker
     env: python
     buildCommand: "chmod +x build.sh && ./build.sh"
-    startCommand: "gunicorn --bind 0.0.0.0:$PORT backend.wsgi:application"
+    startCommand: "cd backend && gunicorn --bind 0.0.0.0:$PORT wsgi:application"
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.9
