@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import API_BASE from './apiConfig';
+import ProjectDetailsModal from './components/ProjectDetailsModal'; // Add this import
 
 const PublicSubmissionsPage = () => {
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [selectedSubmission, setSelectedSubmission] = useState(null); // Add this state for modal
   
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -148,8 +150,26 @@ const PublicSubmissionsPage = () => {
       : 'N/A'
   };
 
+  // Function to open project details modal
+  const openProjectDetails = (submission) => {
+    setSelectedSubmission(submission);
+  };
+
+  // Function to close project details modal
+  const closeProjectDetails = () => {
+    setSelectedSubmission(null);
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Project Details Modal */}
+      {selectedSubmission && (
+        <ProjectDetailsModal 
+          submission={selectedSubmission} 
+          onClose={closeProjectDetails} 
+        />
+      )}
+      
       <div className="text-center mb-10">
         <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Project Gallery</h1>
         <p className="mt-3 text-lg md:text-xl text-gray-600">Explore AI-generated projects from our community</p>
@@ -390,76 +410,51 @@ const PublicSubmissionsPage = () => {
                     </div>
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    File
+                    Files
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {submissions.map((submission) => (
-                  <tr key={submission.id} className="hover:bg-gray-50 transition-colors duration-200">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{submission.lumen_name}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        {submission.ai_used}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {submission.ai_agent || 'N/A'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
-                      {formatCurrency(submission.reward_amount)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {formatDate(submission.timestamp)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {submission.screenshot_path ? (
-                        <div className="flex items-center space-x-2">
-                          {getFileType(submission.screenshot_path) === 'screenshot' ? (
-                            <>
-                              <a 
-                                href={`${API_BASE}/${submission.screenshot_path}`} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center text-blue-600 hover:text-blue-900 font-medium"
-                              >
-                                <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                View
-                              </a>
-                              <a 
-                                href={`${API_BASE}/${submission.screenshot_path}`} 
-                                download
-                                className="inline-flex items-center text-green-600 hover:text-green-900 font-medium"
-                              >
-                                <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                </svg>
-                                Download
-                              </a>
-                            </>
-                          ) : (
-                            <a 
-                              href={`${API_BASE}/${submission.screenshot_path}`} 
-                              download
-                              className="inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-                            >
-                              <svg className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                              </svg>
-                              Download Project
-                            </a>
-                          )}
-                        </div>
-                      ) : (
-                        'N/A'
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                {submissions.map((submission) => {
+                  // Count total files (primary + additional)
+                  const totalFiles = 1 + (submission.additional_screenshots?.length || 0);
+                  
+                  return (
+                    <tr key={submission.id} className="hover:bg-gray-50 transition-colors duration-200">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">{submission.lumen_name}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {submission.ai_used}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {submission.ai_agent || 'N/A'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                        {formatCurrency(submission.reward_amount)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {formatDate(submission.timestamp)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {totalFiles} file{totalFiles !== 1 ? 's' : ''}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <button
+                          onClick={() => openProjectDetails(submission)}
+                          className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                        >
+                          View Details
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -494,107 +489,54 @@ const PublicSubmissionsPage = () => {
         // Grid View
         <div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {submissions.map((submission) => (
-              <div key={submission.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200">
-                <div className="p-6">
-                  <div className="flex justify-between items-start">
-                    <h3 className="text-lg font-bold text-gray-900 truncate">{submission.lumen_name}</h3>
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
-                      {submission.ai_used}
-                    </span>
-                  </div>
-                  
-                  <div className="mt-4 flex items-center justify-between">
-                    <div>
-                      <p className="text-xl font-bold text-gray-900">{formatCurrency(submission.reward_amount)}</p>
-                      <p className="text-xs text-gray-500">{formatDate(submission.timestamp)}</p>
-                    </div>
-                    
-                    {submission.screenshot_path && (
-                      <a 
-                        href={`${API_BASE}/${submission.screenshot_path}`} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-lg text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md"
-                      >
-                        {getFileType(submission.screenshot_path) === 'project' ? 'Project' : 'Screenshot'}
-                      </a>
-                    )}
-                  </div>
-                  
-                  {submission.ai_agent && (
-                    <div className="mt-4 pt-4 border-t border-gray-100">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                        Agent: {submission.ai_agent}
+            {submissions.map((submission) => {
+              // Count total files (primary + additional)
+              const totalFiles = 1 + (submission.additional_screenshots?.length || 0);
+              
+              return (
+                <div key={submission.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200">
+                  <div className="p-6">
+                    <div className="flex justify-between items-start">
+                      <h3 className="text-lg font-bold text-gray-900 truncate">{submission.lumen_name}</h3>
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                        {submission.ai_used}
                       </span>
                     </div>
-                  )}
-                  
-                  {/* File Preview Section */}
-                  {submission.screenshot_path && (
-                    <div className="mt-4">
-                      {getFileType(submission.screenshot_path) === 'screenshot' ? (
-                        // For images, show a preview/thumbnail
-                        <div className="relative group">
-                          <a 
-                            href={`${API_BASE}/${submission.screenshot_path}`} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="block overflow-hidden rounded-lg border border-gray-200 hover:border-blue-400 transition-colors duration-200"
-                          >
-                            <div className="bg-gray-100 aspect-video flex items-center justify-center">
-                              <svg className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                              </svg>
-                            </div>
-                            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
-                              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white rounded-full p-2 shadow-lg">
-                                <svg className="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
-                              </div>
-                            </div>
-                          </a>
-                          <div className="mt-2 text-center">
-                            <a 
-                              href={`${API_BASE}/${submission.screenshot_path}`} 
-                              download
-                              className="text-xs font-medium text-blue-600 hover:text-blue-800"
-                            >
-                              Download Screenshot
-                            </a>
-                          </div>
-                        </div>
-                      ) : (
-                        // For projects (zip files), show a download button
-                        <div className="text-center py-3 bg-gray-50 rounded-lg border border-gray-200">
-                          <div className="flex items-center justify-center space-x-2">
-                            <svg className="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            <span className="text-sm font-medium text-gray-700">Project File</span>
-                          </div>
-                          <a 
-                            href={`${API_BASE}/${submission.screenshot_path}`} 
-                            download
-                            className="mt-2 inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-lg text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md"
-                          >
-                            <svg className="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                            </svg>
-                            Download Project
-                          </a>
-                        </div>
-                      )}
+                    
+                    <div className="mt-4 flex items-center justify-between">
+                      <div>
+                        <p className="text-xl font-bold text-gray-900">{formatCurrency(submission.reward_amount)}</p>
+                        <p className="text-xs text-gray-500">{formatDate(submission.timestamp)}</p>
+                      </div>
+                      
+                      <button
+                        onClick={() => openProjectDetails(submission)}
+                        className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-lg text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md"
+                      >
+                        View Details
+                      </button>
                     </div>
-                  )}
-                  
-                  <div className="mt-4">
-                    <p className="text-gray-600 text-sm line-clamp-2">{submission.prompt_text}</p>
+                    
+                    {submission.ai_agent && (
+                      <div className="mt-4 pt-4 border-t border-gray-100">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                          Agent: {submission.ai_agent}
+                        </span>
+                      </div>
+                    )}
+                    
+                    {/* File Info */}
+                    <div className="mt-4 text-sm text-gray-600">
+                      <span className="font-medium">{totalFiles}</span> file{totalFiles !== 1 ? 's' : ''} attached
+                    </div>
+                    
+                    <div className="mt-4">
+                      <p className="text-gray-600 text-sm line-clamp-2">{submission.prompt_text}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
           
           {/* Pagination for Grid View */}

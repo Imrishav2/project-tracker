@@ -136,7 +136,7 @@ def create_app():
                     if file.content_type not in ['application/zip', 'application/x-zip-compressed']:
                         return jsonify({'error': 'Invalid file content type. Only ZIP files are allowed'}), 400
                 
-                # Save file securely
+                # Save primary file securely
                 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
                 secure_name = secure_filename(file.filename)
                 if not secure_name:
@@ -150,6 +150,37 @@ def create_app():
                 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
                 file.save(file_path)
                 
+                # Handle additional screenshots
+                additional_screenshot_paths = []
+                if 'additional_screenshots' in request.files:
+                    additional_files = request.files.getlist('additional_screenshots')
+                    for i, additional_file in enumerate(additional_files):
+                        if additional_file and additional_file.filename:
+                            # Validate additional screenshot file type
+                            allowed_extensions = {'png', 'jpg', 'jpeg'}
+                            
+                            # Check if filename contains extension
+                            if '.' not in additional_file.filename:
+                                continue  # Skip invalid files
+                            
+                            file_ext = additional_file.filename.rsplit('.', 1)[1].lower()
+                            if file_ext not in allowed_extensions:
+                                continue  # Skip invalid files
+                            
+                            # Additional security check for file content
+                            if additional_file.content_type not in ['image/png', 'image/jpeg']:
+                                continue  # Skip invalid files
+                            
+                            # Save additional screenshot
+                            additional_secure_name = secure_filename(additional_file.filename)
+                            if not additional_secure_name:
+                                additional_secure_name = f'screenshot_{i+1}.png'
+                            
+                            additional_filename = f"{timestamp}_additional_{i+1}_{additional_secure_name}"
+                            additional_file_path = os.path.join(app.config['UPLOAD_FOLDER'], additional_filename)
+                            additional_file.save(additional_file_path)
+                            additional_screenshot_paths.append(os.path.join(app.config['UPLOAD_FOLDER'], additional_filename))
+                
                 # Create submission record with relative path for security
                 submission = Submission()
                 submission.lumen_name = request.form['lumen_name']
@@ -159,6 +190,9 @@ def create_app():
                 submission.reward_amount = reward_amount
                 # Store relative path instead of absolute path
                 submission.screenshot_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                # Store additional screenshots as comma-separated paths
+                if additional_screenshot_paths:
+                    submission.additional_screenshots = ','.join(additional_screenshot_paths)
                 
                 db.session.add(submission)
                 db.session.commit()
