@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import styles from './components/EnhancedUI.module.css';
-import Button3D from './components/Button3D';
-import { Card3D, StatsCard3D } from './components/EnhancedComponents';
+import styles from './EnhancedUI.module.css';
+import Button3D from './Button3D';
+import { Card3D, StatsCard3D } from './EnhancedComponents';
 
 const LandingPage = ({ onNavigateToForm, onNavigateToGallery }) => {
   const [isVisible, setIsVisible] = useState(false);

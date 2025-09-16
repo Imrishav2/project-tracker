@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { submitForm } from './api';
 import API_BASE from './apiConfig';
-import styles from './components/EnhancedUI.module.css';
-import Button3D from './components/Button3D';
-import { Card3D, Alert3D } from './components/EnhancedComponents';
+import styles from './EnhancedUI.module.css';
+import Button3D from './Button3D';
+import { Card3D, Alert3D } from './EnhancedComponents';
 
 const EnhancedFormPage = () => {
   const [formData, setFormData] = useState({
