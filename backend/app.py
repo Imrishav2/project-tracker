@@ -109,11 +109,18 @@ def create_app():
         @app.route('/uploads/<path:filename>')
         def uploaded_file(filename):
             try:
-                response = send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+                # Security check - ensure filename doesn't contain path traversal
+                if '..' in filename or filename.startswith('/'):
+                    return "Invalid filename", 400
+                
+                # Ensure we're only looking for the filename, not a path
+                clean_filename = os.path.basename(filename)
+                
+                response = send_from_directory(app.config['UPLOAD_FOLDER'], clean_filename)
                 
                 # Add headers to force download for certain file types
-                if filename.lower().endswith(('.zip', '.rar', '.7z')):
-                    response.headers['Content-Disposition'] = f'attachment; filename="{filename}"'
+                if clean_filename.lower().endswith(('.zip', '.rar', '.7z')):
+                    response.headers['Content-Disposition'] = f'attachment; filename="{clean_filename}"'
                 else:
                     # For images, ensure they are displayed inline
                     response.headers['Content-Disposition'] = 'inline'
@@ -365,7 +372,7 @@ def create_app():
                             additional_filename = f"{timestamp}_additional_{i+1}_{additional_secure_name}"
                             additional_file_path = os.path.join(app.config['UPLOAD_FOLDER'], additional_filename)
                             additional_file.save(additional_file_path)
-                            additional_screenshot_paths.append(os.path.join(app.config['UPLOAD_FOLDER'], additional_filename))
+                            additional_screenshot_paths.append(additional_filename)  # Store just the filename
                 
                 # Create submission record with relative path for security
                 submission = Submission()
@@ -375,10 +382,12 @@ def create_app():
                 submission.ai_agent = request.form['ai_agent']  # Add AI agent field
                 submission.reward_amount = reward_amount
                 # Store relative path instead of absolute path
-                submission.screenshot_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                submission.screenshot_path = filename  # Just the filename, not the full path
                 # Store additional screenshots as comma-separated paths
                 if additional_screenshot_paths:
-                    submission.additional_screenshots = ','.join(additional_screenshot_paths)
+                    # Extract just the filenames
+                    additional_filenames = [os.path.basename(path) for path in additional_screenshot_paths]
+                    submission.additional_screenshots = ','.join(additional_filenames)
                 
                 # Only try to save to database if database is working
                 if not db_issues:

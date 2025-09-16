@@ -175,6 +175,12 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
     return () => clearInterval(interval);
   }, [allFiles, currentImageIndex, autoAdvance, screenshotFiles]);
   
+  // Extract filename from path (handles both Windows and Unix paths)
+  const getFilenameFromPath = (path) => {
+    if (!path) return '';
+    return path.split(/[\/\\]/).pop();
+  };
+  
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
@@ -205,19 +211,20 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
                     {getFileType(allFiles[currentImageIndex].path) === 'screenshot' ? (
                       <div className="bg-gray-100 rounded-lg overflow-auto max-h-[70vh] flex items-center justify-center relative">
                         <img 
-                          src={`${API_BASE}/uploads/${allFiles[currentImageIndex].path.split('/').pop().split('\\').pop()}`} 
+                          src={`${API_BASE}/uploads/${getFilenameFromPath(allFiles[currentImageIndex].path)}`} 
                           alt={`Screenshot ${currentImageIndex + 1}`}
                           className="max-w-full max-h-full object-contain"
                           onError={(e) => {
                             console.error('Image load error for:', e.target.src);
                             // Show error message with file name and retry option
+                            e.target.style.display = 'none';
                             e.target.parentElement.innerHTML = `
                               <div class="w-full h-96 flex flex-col items-center justify-center text-gray-500 p-4 text-center bg-gray-50 rounded-lg">
                                 <svg class="h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                                 <p class="mt-4 font-medium">Image not available</p>
-                                <p class="text-sm mt-2 text-gray-600">${allFiles[currentImageIndex].path.split('/').pop().split('\\').pop()}</p>
+                                <p class="text-sm mt-2 text-gray-600">${getFilenameFromPath(allFiles[currentImageIndex].path)}</p>
                                 <button class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors" onclick="window.location.reload()">Retry Loading</button>
                               </div>
                             `;
@@ -236,10 +243,8 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
                           {allFiles[currentImageIndex].isPrimary ? 'Primary Project ZIP File' : 'Additional Project ZIP File'}
                         </p>
                         <a 
-                          href={`${API_BASE}/uploads/${allFiles[currentImageIndex].path.split('/').pop().split('\\').pop()}`} 
+                          href={`${API_BASE}/uploads/${getFilenameFromPath(allFiles[currentImageIndex].path)}`} 
                           download={getFileType(allFiles[currentImageIndex].path) === 'project' ? 'project.zip' : 'screenshot.jpg'}
-                          target="_blank"
-                          rel="noopener noreferrer"
                           className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
                         >
                           <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -288,12 +293,13 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
                         >
                           {getFileType(file.path) === 'screenshot' ? (
                             <img 
-                              src={`${API_BASE}/uploads/${file.path.split('/').pop().split('\\').pop()}`} 
+                              src={`${API_BASE}/uploads/${getFilenameFromPath(file.path)}`} 
                               alt={`Thumbnail ${index + 1}`}
                               className="w-full h-full object-cover"
                               onError={(e) => {
                                 console.error('Thumbnail load error for:', e.target.src);
                                 // Show error message with file name
+                                e.target.style.display = 'none';
                                 e.target.parentElement.innerHTML = `
                                   <div class="w-full h-full flex flex-col items-center justify-center text-gray-500 p-1 text-center bg-gray-50">
                                     <svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -405,14 +411,12 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
                               ? (file.isPrimary ? `Primary Screenshot` : `Additional Screenshot`)
                               : (file.isPrimary ? `Primary Project ZIP File` : `Additional Project ZIP File`)}
                             <br />
-                            <span className="text-sm text-gray-500">{file.path.split('/').pop().split('\\').pop()}</span>
+                            <span className="text-sm text-gray-500">{getFilenameFromPath(file.path)}</span>
                           </span>
                         </div>
                         <a 
-                          href={`${API_BASE}/uploads/${file.path.split('/').pop().split('\\').pop()}`} 
+                          href={`${API_BASE}/uploads/${getFilenameFromPath(file.path)}`} 
                           download={getFileType(file.path) === 'project' ? `project-${index + 1}.zip` : `screenshot-${index + 1}.jpg`}
-                          target="_blank"
-                          rel="noopener noreferrer"
                           className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
                         >
                           Download

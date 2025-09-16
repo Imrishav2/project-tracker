@@ -117,8 +117,23 @@ const PublicSubmissionsPage = () => {
 
   const getFileType = (filePath) => {
     if (!filePath) return 'unknown';
-    if (filePath.includes('screenshot')) return 'screenshot';
-    if (filePath.includes('project')) return 'project';
+    
+    // Extract just the filename from the path
+    const filename = filePath.split('/').pop().split('\\').pop().toLowerCase();
+    
+    // Check file extension
+    if (filename.endsWith('.png') || filename.endsWith('.jpg') || filename.endsWith('.jpeg')) {
+      return 'screenshot';
+    }
+    
+    if (filename.endsWith('.zip') || filename.endsWith('.rar') || filename.endsWith('.7z')) {
+      return 'project';
+    }
+    
+    // Fallback to filename content check
+    if (filename.includes('screenshot')) return 'screenshot';
+    if (filename.includes('project')) return 'project';
+    
     return 'file';
   };
 
@@ -514,6 +529,7 @@ const PublicSubmissionsPage = () => {
                             alt="Project preview"
                             className="w-full h-36 object-cover transition-transform duration-300 hover:scale-105"
                             onError={(e) => {
+                              console.error('Image load error for:', e.target.src);
                               e.target.style.display = 'none';
                             }}
                           />
@@ -537,7 +553,8 @@ const PublicSubmissionsPage = () => {
                                   alt={`Additional preview ${index + 1}`}
                                   className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                                   onError={(e) => {
-                                    e.target.parentElement.style.display = 'none';
+                                    console.error('Thumbnail load error for:', e.target.src);
+                                    e.target.style.display = 'none';
                                   }}
                                 />
                               </div>
