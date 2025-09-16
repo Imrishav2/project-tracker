@@ -7,23 +7,23 @@ set -e
 # Install system dependencies for psycopg2
 echo "Installing system dependencies..."
 apt-get update
-apt-get install -y libpq-dev gcc
+apt-get install -y libpq-dev gcc postgresql-server-dev-all
 
 # Upgrade pip to latest version
 echo "Upgrading pip..."
 pip install --upgrade pip
 
-# Force reinstall psycopg2-binary to avoid conflicts
-echo "Force installing psycopg2-binary version 2.9.5..."
-pip install --no-cache-dir --force-reinstall psycopg2-binary==2.9.5
+# Try to install psycopg2-binary first
+echo "Installing psycopg2-binary..."
+pip install --no-cache-dir psycopg2-binary
 
 # Verify the installation
 echo "Verifying psycopg2-binary installation..."
 pip show psycopg2-binary
 
-# Install other Python dependencies (without psycopg2-binary)
+# Install other Python dependencies
 echo "Installing other dependencies..."
-pip install --no-cache-dir --no-deps Flask==2.3.2 Flask-SQLAlchemy==3.0.5 Flask-CORS==4.0.0 PyJWT==2.7.0 Werkzeug==2.3.6 python-dotenv==1.0.0 gunicorn==21.2.0
+pip install --no-cache-dir Flask==2.3.2 Flask-SQLAlchemy==3.0.5 Flask-CORS==4.0.0 PyJWT==2.7.0 Werkzeug==2.3.6 python-dotenv==1.0.0 gunicorn==21.2.0
 
 # Freeze the installed packages to verify versions
 echo "Installed packages:"

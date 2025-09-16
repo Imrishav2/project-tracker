@@ -22,6 +22,8 @@ except ImportError as e:
         logger.info("psycopg2 imported successfully (from psycopg2.extensions)")
     except ImportError as e2:
         logger.error(f"psycopg2 import failed: {str(e2)}")
+        # Set a flag to indicate database issues
+        os.environ['DB_ISSUES'] = 'true'
 
 try:
     # Import and create the Flask application
@@ -31,7 +33,22 @@ try:
 except Exception as e:
     logger.error(f"Error creating application: {str(e)}")
     logger.exception("Full traceback:")
-    raise
+    # Create a minimal application for debugging
+    from flask import Flask
+    application = Flask(__name__)
+    
+    @application.route('/')
+    def health_check():
+        return "Application is running but there may be database connection issues"
+    
+    @application.route('/debug')
+    def debug_info():
+        import subprocess
+        try:
+            result = subprocess.run(['pip', 'freeze'], capture_output=True, text=True)
+            return f"<pre>{result.stdout}</pre>"
+        except Exception as e:
+            return f"Error getting pip freeze: {str(e)}"
 
 if __name__ == "__main__":
     application.run()

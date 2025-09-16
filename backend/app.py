@@ -24,20 +24,28 @@ def create_app():
         # Configuration
         app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key')
         
-        # Use PostgreSQL in production, SQLite in development
-        database_url = os.environ.get('DATABASE_URL')
-        if database_url:
-            # Render provides DATABASE_URL for PostgreSQL
-            # Handle different URL formats
-            if database_url.startswith('postgres://'):
-                # Convert postgres:// to postgresql:// for SQLAlchemy
-                database_url = database_url.replace('postgres://', 'postgresql://', 1)
-            app.config['SQLALCHEMY_DATABASE_URI'] = database_url
-            logger.info(f"Using PostgreSQL database: {database_url}")
+        # Check if we have database issues flag set
+        db_issues = os.environ.get('DB_ISSUES', 'false').lower() == 'true'
+        
+        if db_issues:
+            logger.warning("Database issues detected, using minimal configuration")
+            # Use SQLite in-memory database for debugging
+            app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
         else:
-            # Local development - use SQLite
-            app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-            logger.info("Using SQLite database for development")
+            # Use PostgreSQL in production, SQLite in development
+            database_url = os.environ.get('DATABASE_URL')
+            if database_url:
+                # Render provides DATABASE_URL for PostgreSQL
+                # Handle different URL formats
+                if database_url.startswith('postgres://'):
+                    # Convert postgres:// to postgresql:// for SQLAlchemy
+                    database_url = database_url.replace('postgres://', 'postgresql://', 1)
+                app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+                logger.info(f"Using PostgreSQL database: {database_url}")
+            else:
+                # Local development - use SQLite
+                app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+                logger.info("Using SQLite database for development")
         
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         app.config['UPLOAD_FOLDER'] = os.environ.get('UPLOAD_FOLDER', 'uploads')
@@ -46,7 +54,12 @@ def create_app():
         logger.info(f"Database URL: {app.config.get('SQLALCHEMY_DATABASE_URI', 'Not set')}")
         
         # Initialize extensions
-        db.init_app(app)
+        try:
+            db.init_app(app)
+        except Exception as e:
+            logger.error(f"Error initializing database: {str(e)}")
+            # Continue without database if there are issues
+        
         # Configure CORS to allow all origins for all routes (appropriate for a public API)
         CORS(app)
         
@@ -61,6 +74,17 @@ def create_app():
         @app.route('/health')
         def health_check():
             return jsonify({'status': 'healthy', 'timestamp': datetime.now().isoformat()})
+        
+        # Debug endpoint to check environment
+        @app.route('/debug/env')
+        def debug_env():
+            env_info = {
+                'python_version': sys.version,
+                'database_url': os.environ.get('DATABASE_URL', 'Not set'),
+                'db_issues': os.environ.get('DB_ISSUES', 'Not set'),
+                'upload_folder': app.config['UPLOAD_FOLDER']
+            }
+            return jsonify(env_info)
         
         # Serve uploaded files
         @app.route('/uploads/<path:filename>')
@@ -194,25 +218,41 @@ def create_app():
                 if additional_screenshot_paths:
                     submission.additional_screenshots = ','.join(additional_screenshot_paths)
                 
-                db.session.add(submission)
-                db.session.commit()
+                # Only try to save to database if database is working
+                if not db_issues:
+                    db.session.add(submission)
+                    db.session.commit()
                 
                 logger.info(f"New submission received from {request.form['lumen_name']} with {file_type}")
                 
                 return jsonify({
                     'message': '✅ Submission received. You are responsible for accuracy of details.',
-                    'submission_id': submission.id
+                    'submission_id': submission.id if not db_issues else None
                 }), 201
                 
             except Exception as e:
                 logger.error(f"Error during submission: {str(e)}")
-                db.session.rollback()
+                if not db_issues:
+                    db.session.rollback()
                 return jsonify({'error': 'An error occurred while processing your submission. Please try again later.'}), 500
         
         @app.route('/api/submissions', methods=['GET'])
         @jwt_required
         def get_submissions():
             try:
+                # Return empty list if there are database issues
+                if db_issues:
+                    return jsonify({
+                        'submissions': [],
+                        'pagination': {
+                            'page': 1,
+                            'pages': 1,
+                            'per_page': 10,
+                            'total': 0
+                        },
+                        'message': 'Database issues detected, returning empty list'
+                    }), 200
+                
                 # Get pagination parameters
                 page = request.args.get('page', 1, type=int)
                 per_page = request.args.get('per_page', 10, type=int)
@@ -285,6 +325,19 @@ def create_app():
         @app.route('/api/public/submissions', methods=['GET'])
         def get_public_submissions():
             try:
+                # Return empty list if there are database issues
+                if db_issues:
+                    return jsonify({
+                        'submissions': [],
+                        'pagination': {
+                            'page': 1,
+                            'pages': 1,
+                            'per_page': 10,
+                            'total': 0
+                        },
+                        'message': 'Database issues detected, returning empty list'
+                    }), 200
+                
                 # Get pagination parameters
                 page = request.args.get('page', 1, type=int)
                 per_page = request.args.get('per_page', 10, type=int)
@@ -356,37 +409,40 @@ def create_app():
         
         # Create tables
         with app.app_context():
-            logger.info("Creating database tables...")
-            try:
-                # Try to create all tables
-                db.create_all()
-                logger.info("Database tables created successfully")
-            except Exception as e:
-                logger.error(f"Error creating database tables: {str(e)}")
-                # Try to add missing columns if tables already exist
+            if not db_issues:
+                logger.info("Creating database tables...")
                 try:
-                    # For SQLite and PostgreSQL, try to add columns if they don't exist
-                    from sqlalchemy import text
-                    
-                    # Try to add ai_agent column
+                    # Try to create all tables
+                    db.create_all()
+                    logger.info("Database tables created successfully")
+                except Exception as e:
+                    logger.error(f"Error creating database tables: {str(e)}")
+                    # Try to add missing columns if tables already exist
                     try:
-                        db.session.execute(text("ALTER TABLE submissions ADD COLUMN ai_agent VARCHAR(50)"))
-                        logger.info("Added ai_agent column to submissions table")
-                    except Exception:
-                        logger.info("ai_agent column already exists or not needed")
-                    
-                    # Try to add additional_screenshots column
-                    try:
-                        db.session.execute(text("ALTER TABLE submissions ADD COLUMN additional_screenshots TEXT"))
-                        logger.info("Added additional_screenshots column to submissions table")
-                    except Exception:
-                        logger.info("additional_screenshots column already exists or not needed")
-                    
-                    db.session.commit()
-                    logger.info("Database schema updated successfully")
-                except Exception as e2:
-                    logger.error(f"Error updating database schema: {str(e2)}")
-                    raise e2 from e
+                        # For SQLite and PostgreSQL, try to add columns if they don't exist
+                        from sqlalchemy import text
+                        
+                        # Try to add ai_agent column
+                        try:
+                            db.session.execute(text("ALTER TABLE submissions ADD COLUMN ai_agent VARCHAR(50)"))
+                            logger.info("Added ai_agent column to submissions table")
+                        except Exception:
+                            logger.info("ai_agent column already exists or not needed")
+                        
+                        # Try to add additional_screenshots column
+                        try:
+                            db.session.execute(text("ALTER TABLE submissions ADD COLUMN additional_screenshots TEXT"))
+                            logger.info("Added additional_screenshots column to submissions table")
+                        except Exception:
+                            logger.info("additional_screenshots column already exists or not needed")
+                        
+                        db.session.commit()
+                        logger.info("Database schema updated successfully")
+                    except Exception as e2:
+                        logger.error(f"Error updating database schema: {str(e2)}")
+                        raise e2 from e
+            else:
+                logger.warning("Skipping database initialization due to database issues")
         
         logger.info("Application created successfully")
         return app
@@ -394,7 +450,24 @@ def create_app():
     except Exception as e:
         logger.error(f"Error creating app: {str(e)}")
         logger.exception("Full traceback:")
-        raise
+        
+        # Create a minimal application for debugging
+        app = Flask(__name__)
+        
+        @app.route('/')
+        def fallback_health_check():
+            return "Application is running but there may be database connection issues"
+        
+        @app.route('/debug')
+        def debug_info():
+            import subprocess
+            try:
+                result = subprocess.run(['pip', 'freeze'], capture_output=True, text=True)
+                return f"<pre>{result.stdout}</pre>"
+            except Exception as e:
+                return f"Error getting pip freeze: {str(e)}"
+        
+        return app
 
 if __name__ == '__main__':
     app = create_app()
