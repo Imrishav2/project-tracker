@@ -36,6 +36,13 @@ class Submission(db.Model):
             elif isinstance(self.additional_screenshots, list):
                 additional_screenshots_list = self.additional_screenshots
         
+        # Extract just the filename from the full path for URLs
+        import os
+        screenshot_filename = os.path.basename(self.screenshot_path) if self.screenshot_path else None
+        additional_screenshots_filenames = [
+            os.path.basename(path) for path in additional_screenshots_list
+        ] if additional_screenshots_list else []
+        
         return {
             'id': self.id,
             'lumen_name': self.lumen_name,
@@ -43,8 +50,8 @@ class Submission(db.Model):
             'ai_used': self.ai_used,
             'ai_agent': self.ai_agent,  # Include new field
             'reward_amount': self.reward_amount,
-            'screenshot_path': self.screenshot_path,
-            'additional_screenshots': additional_screenshots_list,
+            'screenshot_path': screenshot_filename,
+            'additional_screenshots': additional_screenshots_filenames,
             'timestamp': self.timestamp.isoformat() if self.timestamp else None
         }
 
