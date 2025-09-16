@@ -11,15 +11,30 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
     ...(submission.screenshot_path ? [{path: submission.screenshot_path, isPrimary: true}] : []),
     ...((submission.additional_screenshots && Array.isArray(submission.additional_screenshots)) 
         ? submission.additional_screenshots.map(screenshot => ({path: screenshot, isPrimary: false}))
-        : [])
-  ];
+        : (submission.additional_screenshots && typeof submission.additional_screenshots === 'string'
+            ? submission.additional_screenshots.split(',').map(screenshot => ({path: screenshot.trim(), isPrimary: false}))
+            : []))
+  ].filter(file => file.path); // Filter out any files without paths
   
   const getFileType = (filePath) => {
     if (!filePath) return 'unknown';
+    
     // Extract just the filename from the path
-    const filename = filePath.split('/').pop().split('\\').pop();
+    const filename = filePath.split('/').pop().split('\\').pop().toLowerCase();
+    
+    // Check file extension
+    if (filename.endsWith('.png') || filename.endsWith('.jpg') || filename.endsWith('.jpeg')) {
+      return 'screenshot';
+    }
+    
+    if (filename.endsWith('.zip') || filename.endsWith('.rar') || filename.endsWith('.7z')) {
+      return 'project';
+    }
+    
+    // Fallback to filename content check
     if (filename.includes('screenshot')) return 'screenshot';
     if (filename.includes('project')) return 'project';
+    
     return 'file';
   };
   
@@ -32,26 +47,75 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
   };
   
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    try {
+      const date = new Date(dateString);
+      // Convert to Indian Standard Time (IST)
+      const options = {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+        timeZone: 'Asia/Kolkata'
+      };
+      return date.toLocaleDateString('en-IN', options);
+    } catch (error) {
+      // Fallback to default formatting if there's an error
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
   };
   
   const nextImage = () => {
-    // Navigate through all files
-    if (allFiles.length > 1) {
+    // Navigate through screenshot files only
+    const isCurrentFileScreenshot = getFileType(allFiles[currentImageIndex].path) === 'screenshot';
+    
+    if (isCurrentFileScreenshot && screenshotFiles.length > 1) {
+      const currentScreenshotIndex = screenshotFiles.findIndex(file => 
+        file.path === allFiles[currentImageIndex].path
+      );
+      
+      if (currentScreenshotIndex !== -1) {
+        const nextIndex = (currentScreenshotIndex + 1) % screenshotFiles.length;
+        const nextFileIndex = allFiles.findIndex(file => 
+          file.path === screenshotFiles[nextIndex].path
+        );
+        if (nextFileIndex !== -1) {
+          setCurrentImageIndex(nextFileIndex);
+        }
+      }
+    } else if (allFiles.length > 1) {
+      // If current file is not a screenshot or no screenshots, move to next file
       setCurrentImageIndex((prevIndex) => (prevIndex + 1) % allFiles.length);
     }
   };
   
   const prevImage = () => {
-    // Navigate through all files
-    if (allFiles.length > 1) {
+    // Navigate through screenshot files only
+    const isCurrentFileScreenshot = getFileType(allFiles[currentImageIndex].path) === 'screenshot';
+    
+    if (isCurrentFileScreenshot && screenshotFiles.length > 1) {
+      const currentScreenshotIndex = screenshotFiles.findIndex(file => 
+        file.path === allFiles[currentImageIndex].path
+      );
+      
+      if (currentScreenshotIndex !== -1) {
+        const prevIndex = (currentScreenshotIndex - 1 + screenshotFiles.length) % screenshotFiles.length;
+        const prevFileIndex = allFiles.findIndex(file => 
+          file.path === screenshotFiles[prevIndex].path
+        );
+        if (prevFileIndex !== -1) {
+          setCurrentImageIndex(prevFileIndex);
+        }
+      }
+    } else if (allFiles.length > 1) {
+      // If current file is not a screenshot or no screenshots, move to previous file
       setCurrentImageIndex((prevIndex) => (prevIndex - 1 + allFiles.length) % allFiles.length);
     }
   };
@@ -72,16 +136,44 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [allFiles.length]);
   
-  // Auto-advance through all files every 3 seconds
+  // Separate screenshots from other files
+  const screenshotFiles = allFiles.filter(file => getFileType(file.path) === 'screenshot');
+  const otherFiles = allFiles.filter(file => getFileType(file.path) !== 'screenshot');
+  
+  // Auto-advance through screenshot files only every 3 seconds
   useEffect(() => {
-    if (!autoAdvance || allFiles.length <= 1) return;
+    if (!autoAdvance || screenshotFiles.length <= 1) return;
+    
+    // Don't auto-advance if current file is not a screenshot
+    const isCurrentFileScreenshot = getFileType(allFiles[currentImageIndex].path) === 'screenshot';
+    if (!isCurrentFileScreenshot) {
+      // If we're on a non-screenshot file, find the first screenshot to start auto-advance
+      const firstScreenshotIndex = allFiles.findIndex(file => getFileType(file.path) === 'screenshot');
+      if (firstScreenshotIndex !== -1 && firstScreenshotIndex !== currentImageIndex) {
+        setCurrentImageIndex(firstScreenshotIndex);
+      }
+      return;
+    }
     
     const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % allFiles.length);
+      // Only advance through screenshots
+      const currentScreenshotIndex = screenshotFiles.findIndex(file => 
+        file.path === allFiles[currentImageIndex].path
+      );
+      
+      if (currentScreenshotIndex !== -1) {
+        const nextIndex = (currentScreenshotIndex + 1) % screenshotFiles.length;
+        const nextFileIndex = allFiles.findIndex(file => 
+          file.path === screenshotFiles[nextIndex].path
+        );
+        if (nextFileIndex !== -1) {
+          setCurrentImageIndex(nextFileIndex);
+        }
+      }
     }, 3000);
     
     return () => clearInterval(interval);
-  }, [allFiles.length, autoAdvance]);
+  }, [allFiles, currentImageIndex, autoAdvance, screenshotFiles]);
   
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
@@ -111,22 +203,27 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
                   {/* Main File Display */}
                   <div className="relative">
                     {getFileType(allFiles[currentImageIndex].path) === 'screenshot' ? (
-                      <div className="bg-gray-100 rounded-lg overflow-auto max-h-[70vh] flex items-center justify-center">
+                      <div className="bg-gray-100 rounded-lg overflow-auto max-h-[70vh] flex items-center justify-center relative">
                         <img 
                           src={`${API_BASE}/uploads/${allFiles[currentImageIndex].path.split('/').pop().split('\\').pop()}`} 
                           alt={`Screenshot ${currentImageIndex + 1}`}
                           className="max-w-full max-h-full object-contain"
                           onError={(e) => {
-                            e.target.style.display = 'none';
+                            console.error('Image load error for:', e.target.src);
+                            // Show error message with file name and retry option
                             e.target.parentElement.innerHTML = `
-                              <div class="w-full h-96 flex flex-col items-center justify-center text-gray-500 p-4 text-center">
+                              <div class="w-full h-96 flex flex-col items-center justify-center text-gray-500 p-4 text-center bg-gray-50 rounded-lg">
                                 <svg class="h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
-                                <p class="mt-4">Image not available</p>
-                                <p class="text-sm mt-2">${allFiles[currentImageIndex].path.split('/').pop().split('\\').pop()}</p>
+                                <p class="mt-4 font-medium">Image not available</p>
+                                <p class="text-sm mt-2 text-gray-600">${allFiles[currentImageIndex].path.split('/').pop().split('\\').pop()}</p>
+                                <button class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors" onclick="window.location.reload()">Retry Loading</button>
                               </div>
                             `;
+                          }}
+                          onLoad={(e) => {
+                            console.log('Image loaded successfully:', e.target.src);
                           }}
                         />
                       </div>
@@ -153,8 +250,8 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
                       </div>
                     )}
                     
-                    {/* Navigation Arrows (if multiple images) */}
-                    {allFiles.filter(file => getFileType(file.path) === 'screenshot').length > 1 && (
+                    {/* Navigation Arrows (if multiple screenshots) */}
+                    {screenshotFiles.length > 1 && (
                       <>
                         <button
                           onClick={prevImage}
@@ -195,15 +292,19 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
                               alt={`Thumbnail ${index + 1}`}
                               className="w-full h-full object-cover"
                               onError={(e) => {
-                                e.target.style.display = 'none';
+                                console.error('Thumbnail load error for:', e.target.src);
+                                // Show error message with file name
                                 e.target.parentElement.innerHTML = `
-                                  <div class="w-full h-full flex flex-col items-center justify-center text-gray-500 p-1 text-center">
+                                  <div class="w-full h-full flex flex-col items-center justify-center text-gray-500 p-1 text-center bg-gray-50">
                                     <svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
-                                    <span class="text-xs text-gray-500 mt-1">N/A</span>
+                                    <span class="text-xs text-gray-500 mt-1">Image N/A</span>
                                   </div>
                                 `;
+                              }}
+                              onLoad={(e) => {
+                                console.log('Thumbnail loaded successfully:', e.target.src);
                               }}
                             />
                           ) : (
@@ -222,7 +323,7 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
                   {/* File Counter */}
                   {allFiles.length > 1 && (
                     <div className="text-center text-sm text-gray-500">
-                      {currentImageIndex + 1} of {allFiles.length} files
+                      {currentImageIndex + 1} of {allFiles.length} files ({screenshotFiles.length} screenshots, {otherFiles.length} other files)
                       <div className="flex items-center justify-center mt-2 space-x-4">
                         <button
                           onClick={() => setAutoAdvance(!autoAdvance)}
@@ -234,9 +335,9 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
                         >
                           {autoAdvance ? 'Stop Auto' : 'Start Auto'}
                         </button>
-                        {allFiles.filter(file => getFileType(file.path) === 'screenshot').length > 1 && (
+                        {screenshotFiles.length > 1 && (
                           <div className="text-xs text-gray-400">
-                            Use arrow keys or click arrows to navigate
+                            Auto-advances through screenshots only
                           </div>
                         )}
                       </div>
@@ -301,10 +402,10 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
                           )}
                           <span className="text-sm font-medium text-gray-900">
                             {getFileType(file.path) === 'screenshot' 
-                              ? (file.isPrimary ? `Primary Screenshot` : `Additional Screenshot ${index}`)
-                              : (file.isPrimary ? `Primary Project ZIP File` : `Additional Project ZIP File ${index}`)}
+                              ? (file.isPrimary ? `Primary Screenshot` : `Additional Screenshot`)
+                              : (file.isPrimary ? `Primary Project ZIP File` : `Additional Project ZIP File`)}
                             <br />
-                            <span className="text-sm text-gray-500">{file.path.split('/').pop().split('\\').pop()}</span>
+                            <span className="text-sm text-gray-500">{allFiles[currentImageIndex].path.split('/').pop().split('\\').pop()}</span>
                           </span>
                         </div>
                         <a 
