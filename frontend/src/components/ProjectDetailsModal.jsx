@@ -4,12 +4,12 @@ import API_BASE from '../apiConfig';
 const ProjectDetailsModal = ({ submission, onClose }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
-  // Combine primary screenshot with additional screenshots
+  // Combine primary file with additional screenshots
   // Handle cases where additional_screenshots might be undefined or not an array
-  const allScreenshots = [
-    ...(submission.screenshot_path ? [submission.screenshot_path] : []),
+  const allFiles = [
+    ...(submission.screenshot_path ? [{path: submission.screenshot_path, isPrimary: true}] : []),
     ...((submission.additional_screenshots && Array.isArray(submission.additional_screenshots)) 
-        ? submission.additional_screenshots 
+        ? submission.additional_screenshots.map(screenshot => ({path: screenshot, isPrimary: false}))
         : [])
   ];
   
@@ -40,14 +40,16 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
   };
   
   const nextImage = () => {
-    if (allScreenshots.length > 1) {
-      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % allScreenshots.length);
+    // Navigate through all files
+    if (allFiles.length > 1) {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % allFiles.length);
     }
   };
   
   const prevImage = () => {
-    if (allScreenshots.length > 1) {
-      setCurrentImageIndex((prevIndex) => (prevIndex - 1 + allScreenshots.length) % allScreenshots.length);
+    // Navigate through all files
+    if (allFiles.length > 1) {
+      setCurrentImageIndex((prevIndex) => (prevIndex - 1 + allFiles.length) % allFiles.length);
     }
   };
   
@@ -65,18 +67,18 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
     
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [allScreenshots.length]);
+  }, [allFiles.length]);
   
-  // Auto-advance images every 3 seconds when there are multiple images
+  // Auto-advance through all files every 3 seconds
   useEffect(() => {
-    if (allScreenshots.length <= 1) return;
+    if (allFiles.length <= 1) return;
     
     const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % allScreenshots.length);
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % allFiles.length);
     }, 3000);
     
     return () => clearInterval(interval);
-  }, [allScreenshots.length]);
+  }, [allFiles.length]);
   
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
@@ -101,14 +103,14 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Media Section */}
             <div>
-              {allScreenshots.length > 0 ? (
+              {allFiles.length > 0 ? (
                 <div className="space-y-4">
-                  {/* Main Image Display */}
+                  {/* Main File Display */}
                   <div className="relative">
-                    {getFileType(allScreenshots[currentImageIndex]) === 'screenshot' ? (
+                    {getFileType(allFiles[currentImageIndex].path) === 'screenshot' ? (
                       <div className="bg-gray-100 rounded-lg overflow-hidden">
                         <img 
-                          src={`${API_BASE}/${allScreenshots[currentImageIndex]}`} 
+                          src={`${API_BASE}/${allFiles[currentImageIndex].path}`} 
                           alt={`Screenshot ${currentImageIndex + 1}`}
                           className="w-full h-96 object-contain"
                         />
@@ -118,9 +120,11 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
                         <svg className="h-16 w-16 text-gray-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                        <p className="mt-4 text-lg font-medium text-gray-900">Project ZIP File</p>
+                        <p className="mt-4 text-lg font-medium text-gray-900">
+                          {allFiles[currentImageIndex].isPrimary ? 'Primary Project ZIP File' : 'Additional Project ZIP File'}
+                        </p>
                         <a 
-                          href={`${API_BASE}/${allScreenshots[currentImageIndex]}`} 
+                          href={`${API_BASE}/${allFiles[currentImageIndex].path}`} 
                           download
                           className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
                         >
@@ -133,7 +137,7 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
                     )}
                     
                     {/* Navigation Arrows (if multiple images) */}
-                    {allScreenshots.length > 1 && (
+                    {allFiles.filter(file => getFileType(file.path) === 'screenshot').length > 1 && (
                       <>
                         <button
                           onClick={prevImage}
@@ -156,9 +160,9 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
                   </div>
                   
                   {/* Thumbnail Gallery */}
-                  {allScreenshots.length > 1 && (
+                  {allFiles.length > 1 && (
                     <div className="flex space-x-2 overflow-x-auto py-2">
-                      {allScreenshots.map((screenshot, index) => (
+                      {allFiles.map((file, index) => (
                         <button
                           key={index}
                           onClick={() => setCurrentImageIndex(index)}
@@ -168,17 +172,18 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
                               : 'border-gray-200 hover:border-gray-300'
                           }`}
                         >
-                          {getFileType(screenshot) === 'screenshot' ? (
+                          {getFileType(file.path) === 'screenshot' ? (
                             <img 
-                              src={`${API_BASE}/${screenshot}`} 
+                              src={`${API_BASE}/${file.path}`} 
                               alt={`Thumbnail ${index + 1}`}
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                            <div className="w-full h-full bg-gray-100 flex flex-col items-center justify-center p-1">
                               <svg className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                               </svg>
+                              <span className="text-xs text-gray-500 mt-1">ZIP</span>
                             </div>
                           )}
                         </button>
@@ -186,13 +191,15 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
                     </div>
                   )}
                   
-                  {/* Image Counter */}
-                  {allScreenshots.length > 1 && (
+                  {/* File Counter */}
+                  {allFiles.length > 1 && (
                     <div className="text-center text-sm text-gray-500">
-                      {currentImageIndex + 1} of {allScreenshots.length} images
-                      <div className="mt-1 text-xs text-gray-400">
-                        Use arrow keys or click arrows to navigate
-                      </div>
+                      {currentImageIndex + 1} of {allFiles.length} files
+                      {allFiles.filter(file => getFileType(file.path) === 'screenshot').length > 1 && (
+                        <div className="mt-1 text-xs text-gray-400">
+                          Use arrow keys or click arrows to navigate
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -201,7 +208,7 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
                   <svg className="h-16 w-16 text-gray-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                  <p className="mt-4 text-gray-500">No images available</p>
+                  <p className="mt-4 text-gray-500">No files available</p>
                 </div>
               )}
             </div>
@@ -240,10 +247,10 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-3">Download Files</h3>
                   <div className="space-y-3">
-                    {allScreenshots.map((screenshot, index) => (
+                    {allFiles.map((file, index) => (
                       <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div className="flex items-center">
-                          {getFileType(screenshot) === 'screenshot' ? (
+                          {getFileType(file.path) === 'screenshot' ? (
                             <svg className="h-5 w-5 text-gray-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
@@ -253,13 +260,13 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
                             </svg>
                           )}
                           <span className="text-sm font-medium text-gray-900">
-                            {getFileType(screenshot) === 'screenshot' 
-                              ? `Screenshot ${index + 1}` 
-                              : 'Project ZIP File'}
+                            {getFileType(file.path) === 'screenshot' 
+                              ? (file.isPrimary ? `Primary Screenshot` : `Additional Screenshot ${index}`)
+                              : (file.isPrimary ? `Primary Project ZIP File` : `Additional Project ZIP File ${index}`)}
                           </span>
                         </div>
                         <a 
-                          href={`${API_BASE}/${screenshot}`} 
+                          href={`${API_BASE}/${file.path}`} 
                           download
                           className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
                         >
