@@ -14,15 +14,24 @@ This document provides the correct deployment instructions for Render to fix the
    bash: -c: line 1: syntax error near unexpected token `('
    ```
 
+3. **Python version compatibility issue**:
+   ```
+   ImportError: undefined symbol: _PyInterpreterState_Get
+   ```
+
 ## Solution
 
-I've implemented three fixes:
+I've implemented several fixes:
 
 1. **Added a requirements.txt file to the root directory** - Contains the same dependencies as backend/requirements.txt
 
 2. **Created a wsgi.py file in the backend directory** - This avoids the parentheses issue in the gunicorn command
 
 3. **Added a render.yaml file** - This provides automatic configuration for Render deployments
+
+4. **Updated psycopg2-binary version** - Updated to version 2.9.10 for Python 3.13 compatibility
+
+5. **Added runtime.txt file** - Specifies Python version 3.9.18 for compatibility
 
 ## Updated Render Configuration
 
@@ -44,15 +53,36 @@ If you prefer to configure manually in the Render dashboard:
    cd backend && gunicorn --bind 0.0.0.0:$PORT wsgi:application
    ```
 
-## Why This Fixes the Issues
+## Python Version Configuration
 
-1. The requirements.txt file in the root directory allows Render to install dependencies correctly
+Render might be using Python 3.13 by default, which can cause compatibility issues with some packages. To ensure compatibility:
 
-2. The wsgi.py file provides a clean entry point without parentheses:
-   - `wsgi:application` instead of `app:create_app()`
-   - This avoids shell parsing issues with parentheses
+1. **Method 1: Environment Variable (Recommended)**
+   Set the `PYTHON_VERSION` environment variable in your Render service settings:
+   ```
+   PYTHON_VERSION = 3.9.18
+   ```
 
-3. The render.yaml file ensures consistent deployment configuration
+2. **Method 2: runtime.txt file**
+   The project includes a [runtime.txt](file:///c:/whitelist%20group%20project/runtime.txt) file with the following content:
+   ```
+   python-3.9.18
+   ```
+
+3. **Method 3: Update render.yaml**
+   You can also specify the Python version in your render.yaml:
+   ```yaml
+   services:
+     - type: web
+       name: project-tracker-backend
+       env: python
+       buildCommand: pip install -r requirements.txt
+       startCommand: cd backend && gunicorn --bind 0.0.0.0:$PORT wsgi:application
+       envVars:
+         - key: PYTHON_VERSION
+           value: 3.9.18
+         # ... other environment variables
+   ```
 
 ## Environment Variables
 
@@ -74,5 +104,7 @@ If you still encounter issues:
 3. Confirm environment variables are set correctly
 4. Make sure the requirements.txt file is in the root directory of your repository
 5. Verify that the wsgi.py file exists in the backend directory
+6. Check that the psycopg2-binary version is 2.9.10 or higher in requirements.txt
+7. Ensure the Python version is set to 3.9.18 using one of the methods above
 
-This should resolve both the requirements file error and the parentheses syntax error, allowing your application to deploy successfully.
+This should resolve all the deployment issues, allowing your application to deploy successfully.

@@ -1,149 +1,107 @@
 # Render Deployment Troubleshooting Guide
 
-This guide helps resolve common issues encountered when deploying the Project Completion Tracker to Render.
+This document provides a comprehensive guide to troubleshoot and resolve common Render deployment issues for the Project Completion Tracker application.
 
-## Common Error: Requirements File Not Found
+## Issue 1: Requirements File Error
 
 ### Error Message
 ```
 ERROR: Could not open requirements file: [Errno 2] No such file or directory: 'requirements.txt'
 ```
 
-### Causes and Solutions
+### Root Cause
+Render looks for the requirements.txt file in the root directory of the repository, but it was initially located in the backend directory.
 
-#### 1. Missing requirements.txt in Root Directory
-**Cause**: Render looks for requirements.txt in the root directory by default.
-**Solution**: 
-- Ensure a requirements.txt file exists in the project root
-- Verify it contains the necessary dependencies
-- Confirm it's committed to your Git repository
+### Solution
+Created a requirements.txt file in the root directory with the same dependencies as backend/requirements.txt.
 
-#### 2. File Not Committed to Repository
-**Cause**: The requirements.txt file exists locally but hasn't been committed.
-**Solution**:
-```bash
-git add requirements.txt
-git commit -m "Add requirements.txt for Render deployment"
-git push origin main
-```
-
-#### 3. Incorrect Render Build Command
-**Cause**: Render is using a custom build command that doesn't match your setup.
-**Solution**:
-- In Render dashboard, set Build Command to: `pip install -r requirements.txt`
-- Or use the automatic configuration with render.yaml
-
-## Common Error: Syntax Error with Parentheses
+## Issue 2: Syntax Error with Parentheses
 
 ### Error Message
 ```
 bash: -c: line 1: syntax error near unexpected token `('
 ```
 
-### Cause and Solution
+### Root Cause
+The gunicorn start command in Render used `app:create_app()` which contains parentheses that can cause shell parsing issues.
 
-#### Parentheses in Gunicorn Command
-**Cause**: Shell parsing issues with parentheses in the start command.
-**Solution**:
-- Use the wsgi.py approach instead of direct function calls
-- Set Start Command to: `cd backend && gunicorn --bind 0.0.0.0:$PORT wsgi:application`
+### Solution
+Created a wsgi.py file in the backend directory that provides a clean entry point without parentheses:
+- Changed from `app:create_app()` to `wsgi:application`
 
-## Verification Steps
+## Issue 3: Python Version Compatibility
 
-### 1. Check File Structure
-```bash
-# In your project root
-ls -la requirements.txt
-ls -la backend/wsgi.py
+### Error Message
+```
+ImportError: /opt/render/project/src/.venv/lib/python3.13/site-packages/psycopg2/_psycopg.cpython-313-x86_64-linux-gnu.so: undefined symbol: _PyInterpreterState_Get
 ```
 
-### 2. Verify File Contents
-```bash
-# Check requirements.txt
-cat requirements.txt
+### Root Cause
+1. Render was using Python 3.13 by default
+2. psycopg2-binary version 2.9.6 was not compatible with Python 3.13
 
-# Check wsgi.py
-cat backend/wsgi.py
+### Solutions Applied
+
+#### 1. Updated psycopg2-binary Version
+Updated from version 2.9.6 to 2.9.10 in all requirements files:
+- [requirements.txt](file:///c:/whitelist%20group%20project/requirements.txt) (root directory)
+- [backend/requirements.txt](file:///c:/whitelist%20group%20project/backend/requirements.txt)
+- [backend/requirements-dev.txt](file:///c:/whitelist%20group%20project/backend/requirements-dev.txt)
+
+Version 2.9.10 has better compatibility with Python 3.13.
+
+#### 2. Specified Python Version
+Multiple methods to specify Python version:
+
+**Method A: Environment Variable**
+Added `PYTHON_VERSION = 3.9.18` to render.yaml:
+```yaml
+envVars:
+  - key: PYTHON_VERSION
+    value: 3.9.18
 ```
 
-### 3. Confirm Git Status
-```bash
-git status
-git ls-files | grep requirements.txt
+**Method B: runtime.txt File**
+Created [runtime.txt](file:///c:/whitelist%20group%20project/runtime.txt) in root directory with content:
+```
+python-3.9.18
 ```
 
-## Render Configuration Checklist
+**Method C: Render Dashboard**
+Set the PYTHON_VERSION environment variable directly in the Render dashboard.
 
-### Using render.yaml (Recommended)
-- [ ] render.yaml file exists in project root
-- [ ] render.yaml contains correct build and start commands
-- [ ] render.yaml includes necessary environment variables
+## Files Modified
 
-### Manual Configuration
-- [ ] Build Command: `pip install -r requirements.txt`
-- [ ] Start Command: `cd backend && gunicorn --bind 0.0.0.0:$PORT wsgi:application`
-- [ ] Environment variables properly set:
-  - SECRET_KEY
-  - JWT_SECRET_KEY
-  - DATABASE_URL
-  - UPLOAD_FOLDER
+1. [requirements.txt](file:///c:/whitelist%20group%20project/requirements.txt) - Moved to root directory and updated psycopg2-binary version
+2. [backend/requirements.txt](file:///c:/whitelist%20group%20project/backend/requirements.txt) - Updated psycopg2-binary version
+3. [backend/requirements-dev.txt](file:///c:/whitelist%20group%20project/backend/requirements-dev.txt) - Updated psycopg2-binary version
+4. [backend/wsgi.py](file:///c:/whitelist%20group%20project/backend/wsgi.py) - Created for clean entry point
+5. [runtime.txt](file:///c:/whitelist%20group%20project/runtime.txt) - Added to specify Python version
+6. [render.yaml](file:///c:/whitelist%20group%20project/render.yaml) - Updated to include PYTHON_VERSION environment variable
+7. [RENDER_DEPLOYMENT.md](file:///c:/whitelist%20group%20project/RENDER_DEPLOYMENT.md) - Updated documentation
+8. [RENDER_TROUBLESHOOTING.md](file:///c:/whitelist%20group%20project/RENDER_TROUBLESHOOTING.md) - This file
 
-## Environment Variables
+## Deployment Verification Steps
 
-Ensure these environment variables are set in Render:
+1. Push all changes to GitHub
+2. Trigger a new deployment on Render
+3. Monitor the build logs for any errors
+4. Verify the application starts successfully
 
-```
-SECRET_KEY = your-secure-secret-key
-JWT_SECRET_KEY = your-secure-jwt-secret-key
-DATABASE_URL = sqlite:///database.db  # or PostgreSQL connection string
-UPLOAD_FOLDER = uploads
-```
+## Additional Recommendations
 
-## Advanced Troubleshooting
+1. **Database Configuration**: For production deployments, consider using PostgreSQL instead of SQLite:
+   ```
+   DATABASE_URL = postgresql://username:password@host:port/database_name
+   ```
 
-### 1. Check Render Logs
-- Go to your Render dashboard
-- Navigate to your service
-- Check the "Logs" tab for detailed error information
+2. **Environment Variables**: Always use strong, unique values for SECRET_KEY and JWT_SECRET_KEY in production.
 
-### 2. Test Locally
-```bash
-# In project root
-pip install -r requirements.txt
-cd backend
-gunicorn --bind 0.0.0.0:8000 wsgi:application
-```
+3. **Build Cache**: If issues persist, try clearing Render's build cache:
+   - In Render dashboard, go to your service settings
+   - Click "Clear build cache" button
+   - Trigger a new deployment
 
-### 3. Verify Python Version
-Ensure your local Python version matches Render's default or specify in runtime.txt:
-```
-# Create runtime.txt in project root
-python-3.13.4
-```
+4. **Logs Monitoring**: Always check the full deployment logs in Render for detailed error information.
 
-## Deployment Best Practices
-
-### 1. Use Automatic Configuration
-- Include render.yaml for consistent deployments
-- This prevents manual configuration errors
-
-### 2. Keep Dependencies Updated
-- Regularly update requirements.txt
-- Test locally before deploying
-
-### 3. Monitor Deployments
-- Check logs after each deployment
-- Set up notifications for failed builds
-
-## Contact Support
-
-If issues persist:
-1. Check Render's official documentation: https://render.com/docs
-2. Review the community forum: https://community.render.com/
-3. Contact Render support through the dashboard
-
-## Additional Resources
-
-- [Render Python Documentation](https://render.com/docs/python)
-- [Render Environment Variables](https://render.com/docs/environment-variables)
-- [Render Deployment Logs](https://render.com/docs/logging)
+These fixes should resolve all the deployment issues and allow your application to deploy successfully on Render.
