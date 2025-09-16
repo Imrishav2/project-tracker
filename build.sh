@@ -8,7 +8,11 @@ apt-get install -y libpq-dev gcc
 # Install Python dependencies
 pip install -r requirements.txt
 
+# Run migration to ensure database schema is up to date
+echo "Running database migration..."
+cd backend
+python migrate.py
+
 # Run diagnosis to check environment
 echo "Running environment diagnosis..."
-cd backend
 python diagnose.py

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import API_BASE from './apiConfig';
-import ProjectDetailsModal from './components/ProjectDetailsModal'; // Add this import
+import ProjectDetailsModal from './components/ProjectDetailsModal';
 
 const PublicSubmissionsPage = () => {
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [selectedSubmission, setSelectedSubmission] = useState(null); // Add this state for modal
+  const [selectedSubmission, setSelectedSubmission] = useState(null);
   
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -39,7 +39,6 @@ const PublicSubmissionsPage = () => {
       
       const queryString = new URLSearchParams(params).toString();
       const url = `${API_BASE}/api/public/submissions?${queryString}`;
-      console.log('Fetching submissions from:', url); // Debug log
       
       const response = await fetch(url);
       
@@ -103,17 +102,6 @@ const PublicSubmissionsPage = () => {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
-    });
-  };
-
-  const formatDateTime = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
     });
   };
 
@@ -347,7 +335,6 @@ const PublicSubmissionsPage = () => {
             </div>
             <div className="ml-3">
               <p className="text-sm text-white">{error}</p>
-              <p className="text-xs text-white text-opacity-80 mt-1">API Base URL: {API_BASE}</p>
             </div>
           </div>
         </div>
@@ -420,7 +407,9 @@ const PublicSubmissionsPage = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {submissions.map((submission) => {
                   // Count total files (primary + additional)
-                  const totalFiles = 1 + (submission.additional_screenshots?.length || 0);
+                  const totalFiles = 1 + (Array.isArray(submission.additional_screenshots) 
+                    ? submission.additional_screenshots.length 
+                    : (submission.additional_screenshots ? 1 : 0));
                   
                   return (
                     <tr key={submission.id} className="hover:bg-gray-50 transition-colors duration-200">
@@ -491,7 +480,9 @@ const PublicSubmissionsPage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {submissions.map((submission) => {
               // Count total files (primary + additional)
-              const totalFiles = 1 + (submission.additional_screenshots?.length || 0);
+              const totalFiles = 1 + (Array.isArray(submission.additional_screenshots) 
+                ? submission.additional_screenshots.length 
+                : (submission.additional_screenshots ? 1 : 0));
               
               return (
                 <div key={submission.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200">

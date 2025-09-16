@@ -18,7 +18,7 @@ const SimpleFormPage = () => {
   
   const [file, setFile] = useState(null);
   const [fileType, setFileType] = useState('screenshot');
-  const [additionalScreenshots, setAdditionalScreenshots] = useState([]); // New state for additional screenshots
+  const [additionalScreenshots, setAdditionalScreenshots] = useState([]);
   const [errors, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -69,7 +69,7 @@ const SimpleFormPage = () => {
   const handleFileTypeChange = (type) => {
     setFileType(type);
     setFile(null);
-    setAdditionalScreenshots([]); // Clear additional screenshots when changing type
+    setAdditionalScreenshots([]);
     document.getElementById('file-input').value = '';
     if (document.getElementById('additional-screenshots-input')) {
       document.getElementById('additional-screenshots-input').value = '';
@@ -246,7 +246,6 @@ const SimpleFormPage = () => {
               </svg>
               <p className="text-red-700 font-medium">{errors.form}</p>
             </div>
-            <p className="text-xs text-red-600 mt-1">API Base URL: {API_BASE}</p>
           </div>
         )}
         

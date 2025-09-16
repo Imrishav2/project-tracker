@@ -5,9 +5,12 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
   // Combine primary screenshot with additional screenshots
+  // Handle cases where additional_screenshots might be undefined or not an array
   const allScreenshots = [
     ...(submission.screenshot_path ? [submission.screenshot_path] : []),
-    ...(submission.additional_screenshots || [])
+    ...((submission.additional_screenshots && Array.isArray(submission.additional_screenshots)) 
+        ? submission.additional_screenshots 
+        : [])
   ];
   
   const getFileType = (filePath) => {

@@ -12,6 +12,7 @@ An enterprise-ready full-stack web application for tracking and managing mandato
 - **Admin Dashboard**: Table view with search, filter, and sort capabilities
 - **Database**: SQLite (dev) or PostgreSQL (prod) with SQLAlchemy
 - **Deployment**: Docker support and Render/Netlify deployment configurations
+- **Multiple Screenshots**: Support for uploading and displaying multiple screenshots per project
 
 ## Recent Improvements
 
@@ -21,6 +22,7 @@ An enterprise-ready full-stack web application for tracking and managing mandato
 - **Better Performance**: Optimized components and reduced bundle size
 - **Mobile Responsiveness**: Works seamlessly on all device sizes
 - **User-Friendly Messaging**: Clear instructions and feedback throughout the application
+- **Multiple Screenshot Support**: Users can upload multiple screenshots and view them in a carousel
 
 ### Backend Features
 - **Folder Upload Support**: Users can upload entire project folders as ZIP files
@@ -28,6 +30,9 @@ An enterprise-ready full-stack web application for tracking and managing mandato
 - **Secure Authentication**: JWT-based authentication for admin access
 - **Database Flexibility**: SQLite for development, PostgreSQL for production
 - **Scalable Architecture**: Docker support for easy deployment and scaling
+- **Multiple Screenshot Support**: Backend support for storing and retrieving multiple screenshots
+- **Improved Database Migration**: Better handling of schema changes for existing deployments
+- **Enhanced Error Handling**: Better error messages and logging for debugging deployment issues
 
 ## Project Structure
 

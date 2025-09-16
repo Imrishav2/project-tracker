@@ -14,6 +14,7 @@ class Submission(db.Model):
     reward_amount = db.Column(db.Float, nullable=False)
     screenshot_path = db.Column(db.String(200), nullable=False)  # Primary file (screenshot or project)
     # New field to store additional screenshot paths (comma-separated)
+    # Make it nullable to avoid issues with existing records
     additional_screenshots = db.Column(db.Text, nullable=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
     
@@ -29,7 +30,11 @@ class Submission(db.Model):
         # Parse additional screenshots if they exist
         additional_screenshots_list = []
         if self.additional_screenshots:
-            additional_screenshots_list = [s.strip() for s in self.additional_screenshots.split(',') if s.strip()]
+            # Handle both string and potential list types
+            if isinstance(self.additional_screenshots, str):
+                additional_screenshots_list = [s.strip() for s in self.additional_screenshots.split(',') if s.strip()]
+            elif isinstance(self.additional_screenshots, list):
+                additional_screenshots_list = self.additional_screenshots
         
         return {
             'id': self.id,

@@ -357,8 +357,36 @@ def create_app():
         # Create tables
         with app.app_context():
             logger.info("Creating database tables...")
-            db.create_all()
-            logger.info("Database tables created successfully")
+            try:
+                # Try to create all tables
+                db.create_all()
+                logger.info("Database tables created successfully")
+            except Exception as e:
+                logger.error(f"Error creating database tables: {str(e)}")
+                # Try to add missing columns if tables already exist
+                try:
+                    # For SQLite and PostgreSQL, try to add columns if they don't exist
+                    from sqlalchemy import text
+                    
+                    # Try to add ai_agent column
+                    try:
+                        db.session.execute(text("ALTER TABLE submissions ADD COLUMN ai_agent VARCHAR(50)"))
+                        logger.info("Added ai_agent column to submissions table")
+                    except Exception:
+                        logger.info("ai_agent column already exists or not needed")
+                    
+                    # Try to add additional_screenshots column
+                    try:
+                        db.session.execute(text("ALTER TABLE submissions ADD COLUMN additional_screenshots TEXT"))
+                        logger.info("Added additional_screenshots column to submissions table")
+                    except Exception:
+                        logger.info("additional_screenshots column already exists or not needed")
+                    
+                    db.session.commit()
+                    logger.info("Database schema updated successfully")
+                except Exception as e2:
+                    logger.error(f"Error updating database schema: {str(e2)}")
+                    raise e2 from e
         
         logger.info("Application created successfully")
         return app

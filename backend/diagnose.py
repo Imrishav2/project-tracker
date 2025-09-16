@@ -61,6 +61,12 @@ def diagnose_environment():
             logger.info("✅ psycopg2 imported successfully")
     except ImportError as e:
         logger.error(f"❌ psycopg2 import failed: {str(e)}")
+        # Try importing psycopg2-binary as fallback
+        try:
+            from psycopg2 import extensions
+            logger.info("✅ psycopg2 imported successfully (from psycopg2.extensions)")
+        except ImportError as e2:
+            logger.error(f"❌ psycopg2 import failed: {str(e2)}")
     
     # Try to import our modules
     logger.info("=== Application Module Check ===")
@@ -88,9 +94,27 @@ def diagnose_environment():
         logger.exception("Full traceback:")
         return False
     
+    # Test database connection
+    logger.info("=== Database Connection Test ===")
+    try:
+        app = create_app()
+        with app.app_context():
+            # Try to query the database
+            from models import Submission
+            count = Submission.query.count()
+            logger.info(f"✅ Database connection successful. Found {count} submissions.")
+    except Exception as e:
+        logger.error(f"❌ Database connection failed: {str(e)}")
+        logger.exception("Full traceback:")
+        return False
+    
     return True
 
 if __name__ == "__main__":
     success = diagnose_environment()
     logger.info("=== Diagnosis Complete ===")
+    if success:
+        logger.info("✅ All checks passed!")
+    else:
+        logger.error("❌ Some checks failed!")
     sys.exit(0 if success else 1)
