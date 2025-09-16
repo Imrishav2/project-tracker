@@ -18,9 +18,9 @@ def run_pre_start_checks():
     try:
         logger.info("Running pre-start checks...")
         
-        # Import and run migration
-        from migrate_additional_screenshots import migrate_database
-        success = migrate_database()
+        # Import and run force migration
+        from force_migration import force_migration
+        success = force_migration()
         if success:
             logger.info("✅ Database migration completed successfully")
         else:

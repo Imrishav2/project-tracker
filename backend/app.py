@@ -60,6 +60,41 @@ def create_app():
             logger.error(f"Error initializing database: {str(e)}")
             # Continue without database if there are issues
         
+        # Force database schema check and fix
+        with app.app_context():
+            try:
+                from sqlalchemy import inspect, text
+                inspector = inspect(db.engine)
+                
+                # Check if submissions table exists
+                if 'submissions' in inspector.get_table_names():
+                    # Check columns
+                    columns = [col['name'] for col in inspector.get_columns('submissions')]
+                    required_columns = ['ai_agent', 'additional_screenshots']
+                    missing_columns = [col for col in required_columns if col not in columns]
+                    
+                    if missing_columns:
+                        logger.warning(f"Missing columns in submissions table: {missing_columns}")
+                        
+                        # Try to add missing columns
+                        try:
+                            if 'ai_agent' in missing_columns:
+                                db.session.execute(text("ALTER TABLE submissions ADD COLUMN ai_agent VARCHAR(50)"))
+                                logger.info("Added ai_agent column")
+                            
+                            if 'additional_screenshots' in missing_columns:
+                                db.session.execute(text("ALTER TABLE submissions ADD COLUMN additional_screenshots TEXT"))
+                                logger.info("Added additional_screenshots column")
+                            
+                            db.session.commit()
+                            logger.info("Database schema fixed successfully")
+                        except Exception as e:
+                            logger.error(f"Error fixing database schema: {e}")
+                else:
+                    logger.info("Submissions table does not exist, will be created automatically")
+            except Exception as e:
+                logger.error(f"Error checking database schema: {e}")
+        
         # Configure CORS to allow all origins for all routes (appropriate for a public API)
         CORS(app)
         
@@ -69,6 +104,25 @@ def create_app():
         
         # Register blueprints
         app.register_blueprint(auth_bp, url_prefix='/api')
+        
+        # Serve uploaded files
+        @app.route('/uploads/<path:filename>')
+        def uploaded_file(filename):
+            return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+        
+        # Serve frontend static files
+        @app.route('/')
+        def serve_frontend():
+            return send_from_directory('../static', 'index.html')
+        
+        @app.route('/<path:path>')
+        def serve_frontend_files(path):
+            # Serve static files (CSS, JS, images, etc.)
+            if os.path.exists(os.path.join('../static', path)):
+                return send_from_directory('../static', path)
+            # For all other routes, serve index.html (for client-side routing)
+            else:
+                return send_from_directory('../static', 'index.html')
         
         # Health check endpoint
         @app.route('/health')
@@ -135,6 +189,31 @@ def create_app():
             }
             return jsonify(env_info)
         
+        # Database recreation endpoint (FOR DEBUGGING ONLY)
+        @app.route('/debug/recreate-db', methods=['POST'])
+        def recreate_db():
+            try:
+                logger.warning("Database recreation requested - THIS WILL DELETE ALL DATA")
+                
+                # Drop all tables
+                db.drop_all()
+                logger.info("Dropped all tables")
+                
+                # Create all tables
+                db.create_all()
+                logger.info("Created all tables")
+                
+                return jsonify({
+                    'status': 'success',
+                    'message': 'Database recreated successfully'
+                })
+            except Exception as e:
+                logger.error(f"Error recreating database: {e}")
+                return jsonify({
+                    'status': 'error',
+                    'message': f'Error recreating database: {str(e)}'
+                }), 500
+        
         # Database health check endpoint
         @app.route('/health/db')
         def db_health_check():
@@ -160,25 +239,6 @@ def create_app():
                     'message': f'Database connection failed: {str(e)}',
                     'db_issues': True
                 }), 500
-        
-        # Serve uploaded files
-        @app.route('/uploads/<path:filename>')
-        def uploaded_file(filename):
-            return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
-        
-        # Serve frontend static files
-        @app.route('/')
-        def serve_frontend():
-            return send_from_directory('../static', 'index.html')
-        
-        @app.route('/<path:path>')
-        def serve_frontend_files(path):
-            # Serve static files (CSS, JS, images, etc.)
-            if os.path.exists(os.path.join('../static', path)):
-                return send_from_directory('../static', path)
-            # For all other routes, serve index.html (for client-side routing)
-            else:
-                return send_from_directory('../static', 'index.html')
         
         # Routes
         @app.route('/api/submit', methods=['POST'])

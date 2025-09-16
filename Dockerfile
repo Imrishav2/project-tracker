@@ -41,8 +41,8 @@ COPY --from=frontend-build /app/dist ./static
 # Create uploads directory
 RUN mkdir -p uploads
 
-# Run database migration
-RUN python migrate_additional_screenshots.py
+# Run force database migration
+RUN python force_migration.py
 
 # Expose port
 EXPOSE 5000
