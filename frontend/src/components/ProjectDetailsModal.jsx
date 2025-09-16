@@ -110,11 +110,11 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
                   {/* Main File Display */}
                   <div className="relative">
                     {getFileType(allFiles[currentImageIndex].path) === 'screenshot' ? (
-                      <div className="bg-gray-100 rounded-lg overflow-hidden">
+                      <div className="bg-gray-100 rounded-lg overflow-auto max-h-[70vh] flex items-center justify-center">
                         <img 
                           src={`${API_BASE}/uploads/${allFiles[currentImageIndex].path.split('/').pop().split('\\').pop()}`} 
                           alt={`Screenshot ${currentImageIndex + 1}`}
-                          className="w-full h-96 object-contain"
+                          className="max-w-full max-h-full object-contain"
                           onError={(e) => {
                             e.target.parentElement.innerHTML = '<div class="w-full h-96 flex items-center justify-center text-gray-500">Image not available</div>';
                           }}
@@ -130,7 +130,7 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
                         </p>
                         <a 
                           href={`${API_BASE}/uploads/${allFiles[currentImageIndex].path.split('/').pop().split('\\').pop()}`} 
-                          download={getFileType(allFiles[currentImageIndex].path) === 'project' ? true : undefined}
+                          download={getFileType(allFiles[currentImageIndex].path) === 'project' ? 'project.zip' : 'screenshot.jpg'}
                           className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
                         >
                           <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -183,7 +183,7 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
                               alt={`Thumbnail ${index + 1}`}
                               className="w-full h-full object-cover"
                               onError={(e) => {
-                                e.target.parentElement.style.display = 'none';
+                                e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center text-gray-500 text-xs">N/A</div>';
                               }}
                             />
                           ) : (
@@ -246,8 +246,8 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
                 {/* Prompt */}
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-3">Prompt Used</h3>
-                  <div className="bg-gray-50 rounded-lg p-4 max-h-40 overflow-y-auto">
-                    <p className="text-gray-700 whitespace-pre-wrap line-clamp-3">{submission.prompt_text}</p>
+                  <div className="bg-gray-50 rounded-lg p-4 max-h-96 overflow-y-auto">
+                    <p className="text-gray-700 whitespace-pre-wrap">{submission.prompt_text}</p>
                   </div>
                 </div>
                 
@@ -275,7 +275,7 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
                         </div>
                         <a 
                           href={`${API_BASE}/uploads/${file.path.split('/').pop().split('\\').pop()}`} 
-                          download={getFileType(file.path) === 'project' ? true : `screenshot-${index + 1}.jpg`}
+                          download={getFileType(file.path) === 'project' ? `project-${index + 1}.zip` : `screenshot-${index + 1}.jpg`}
                           className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
                         >
                           Download

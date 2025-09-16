@@ -108,13 +108,17 @@ def create_app():
         # Serve uploaded files
         @app.route('/uploads/<path:filename>')
         def uploaded_file(filename):
-            response = send_from_directory(app.config['UPLOAD_FOLDER'], filename)
-            
-            # Add headers to force download for certain file types
-            if filename.lower().endswith(('.zip', '.rar', '.7z')):
-                response.headers['Content-Disposition'] = f'attachment; filename="{filename}"'
-            
-            return response
+            try:
+                response = send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+                
+                # Add headers to force download for certain file types
+                if filename.lower().endswith(('.zip', '.rar', '.7z')):
+                    response.headers['Content-Disposition'] = f'attachment; filename="{filename}"'
+                
+                return response
+            except FileNotFoundError:
+                # Return a proper 404 response
+                return "File not found", 404
         
         # Serve frontend static files
         @app.route('/')
