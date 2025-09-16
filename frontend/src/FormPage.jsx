@@ -79,6 +79,7 @@ const SimpleFormPage = () => {
   const validateForm = () => {
     const newErrors = {};
     
+    // Make all fields required
     if (!formData.lumen_name.trim()) {
       newErrors.lumen_name = 'Please enter your name or identifier';
     }
@@ -152,11 +153,6 @@ const SimpleFormPage = () => {
         if (file.size > 50 * 1024 * 1024) {
           newErrors.screenshot = 'ZIP file size must be less than 50MB';
         }
-        
-        // No additional screenshots for project files
-        if (additionalScreenshots.length > 0) {
-          newErrors.additional_screenshots = 'Additional screenshots are only allowed for screenshot uploads';
-        }
       }
     }
     
@@ -220,13 +216,13 @@ const SimpleFormPage = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto py-8 px-4">
+    <div className="max-w-4xl mx-auto py-8 px-4">
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Submit Your AI Project</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Submit Your AI Project</h1>
         <p className="text-gray-600">Share your AI-generated creations with the community</p>
       </div>
 
-      <div className="bg-white rounded-xl shadow-md p-6">
+      <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
         {successMessage && (
           <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
             <div className="flex items-center">
@@ -253,7 +249,7 @@ const SimpleFormPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Lumen Name */}
             <div>
-              <label htmlFor="lumen_name" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="lumen_name" className="block text-sm font-semibold text-gray-800 mb-1">
                 Your Name <span className="text-red-500">*</span>
               </label>
               <input
@@ -262,7 +258,8 @@ const SimpleFormPage = () => {
                 name="lumen_name"
                 value={formData.lumen_name}
                 onChange={handleChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                required
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 ${
                   errors.lumen_name ? 'border-red-500' : 'border-gray-300'
                 }`}
                 placeholder="e.g., AI_Explorer"
@@ -272,12 +269,12 @@ const SimpleFormPage = () => {
             
             {/* Reward Amount */}
             <div>
-              <label htmlFor="reward_amount" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="reward_amount" className="block text-sm font-semibold text-gray-800 mb-1">
                 Reward Amount <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span className="text-gray-500 sm:text-sm">$</span>
+                  <span className="text-gray-500 font-medium">$</span>
                 </div>
                 <input
                   type="number"
@@ -287,7 +284,8 @@ const SimpleFormPage = () => {
                   min="0.01"
                   value={formData.reward_amount}
                   onChange={handleChange}
-                  className={`block w-full pl-8 pr-12 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  required
+                  className={`block w-full pl-8 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 ${
                     errors.reward_amount ? 'border-red-500' : 'border-gray-300'
                   }`}
                   placeholder="0.00"
@@ -299,16 +297,16 @@ const SimpleFormPage = () => {
           
           {/* File Type Selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-gray-800 mb-2">
               Upload Type <span className="text-red-500">*</span>
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => handleFileTypeChange('screenshot')}
-                className={`flex items-center justify-center px-4 py-3 rounded-lg border ${
+                className={`flex items-center justify-center px-4 py-3 rounded-lg border transition duration-200 ${
                   fileType === 'screenshot'
-                    ? 'bg-blue-50 border-blue-500 text-blue-700 font-medium'
+                    ? 'bg-blue-100 border-blue-500 text-blue-700 font-semibold shadow-sm'
                     : 'border-gray-300 text-gray-700 hover:bg-gray-50'
                 }`}
               >
@@ -320,9 +318,9 @@ const SimpleFormPage = () => {
               <button
                 type="button"
                 onClick={() => handleFileTypeChange('project')}
-                className={`flex items-center justify-center px-4 py-3 rounded-lg border ${
+                className={`flex items-center justify-center px-4 py-3 rounded-lg border transition duration-200 ${
                   fileType === 'project'
-                    ? 'bg-blue-50 border-blue-500 text-blue-700 font-medium'
+                    ? 'bg-blue-100 border-blue-500 text-blue-700 font-semibold shadow-sm'
                     : 'border-gray-300 text-gray-700 hover:bg-gray-50'
                 }`}
               >
@@ -336,10 +334,10 @@ const SimpleFormPage = () => {
           
           {/* File Upload */}
           <div>
-            <label htmlFor="file-input" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="file-input" className="block text-sm font-semibold text-gray-800 mb-1">
               {fileType === 'screenshot' ? 'Prompt Screenshot' : 'Project ZIP File'} <span className="text-red-500">*</span>
             </label>
-            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-lg border-gray-300">
+            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-lg border-gray-300 hover:border-blue-400 transition duration-200">
               <div className="space-y-1 text-center">
                 <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                   <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
@@ -347,7 +345,7 @@ const SimpleFormPage = () => {
                 <div className="flex text-sm text-gray-600">
                   <label
                     htmlFor="file-input"
-                    className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500"
+                    className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 transition duration-200"
                   >
                     <span>Upload a file</span>
                     <input
@@ -357,6 +355,7 @@ const SimpleFormPage = () => {
                       className="sr-only"
                       onChange={handleFileChange}
                       accept={fileType === 'screenshot' ? ".jpg,.jpeg,.png" : ".zip"}
+                      required
                     />
                   </label>
                   <p className="pl-1">or drag and drop</p>
@@ -370,21 +369,21 @@ const SimpleFormPage = () => {
             </div>
             {errors.screenshot && <p className="mt-2 text-sm text-red-600">{errors.screenshot}</p>}
             {file && (
-              <div className="mt-3 flex items-center text-sm text-gray-600">
+              <div className="mt-3 flex items-center text-sm text-gray-700 bg-blue-50 rounded-lg p-3">
                 <svg className="flex-shrink-0 h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
-                <span className="ml-2 truncate">{file.name}</span>
+                <span className="ml-2 truncate font-medium">{file.name}</span>
               </div>
             )}
             
             {/* Additional Screenshots Upload (only for screenshot type) */}
             {fileType === 'screenshot' && (
               <div className="mt-4">
-                <label htmlFor="additional-screenshots-input" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="additional-screenshots-input" className="block text-sm font-semibold text-gray-800 mb-1">
                   Additional Screenshots (Optional)
                 </label>
-                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-lg border-gray-300">
+                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-lg border-gray-300 hover:border-blue-400 transition duration-200">
                   <div className="space-y-1 text-center">
                     <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                       <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
@@ -392,7 +391,7 @@ const SimpleFormPage = () => {
                     <div className="flex text-sm text-gray-600">
                       <label
                         htmlFor="additional-screenshots-input"
-                        className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500"
+                        className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 transition duration-200"
                       >
                         <span>Upload additional screenshots</span>
                         <input
@@ -417,10 +416,10 @@ const SimpleFormPage = () => {
                 {/* Display selected additional screenshots */}
                 {additionalScreenshots.length > 0 && (
                   <div className="mt-3">
-                    <p className="text-sm text-gray-600 mb-2">Selected additional screenshots:</p>
+                    <p className="text-sm font-medium text-gray-800 mb-2">Selected additional screenshots:</p>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                       {additionalScreenshots.map((screenshot, index) => (
-                        <div key={index} className="flex items-center text-sm text-gray-600 bg-gray-50 rounded p-2">
+                        <div key={index} className="flex items-center text-sm text-gray-700 bg-blue-50 rounded p-2">
                           <svg className="flex-shrink-0 h-4 w-4 text-green-500 mr-1" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                           </svg>
@@ -436,7 +435,7 @@ const SimpleFormPage = () => {
             {/* File Preview Section */}
             {file && fileType === 'screenshot' && (
               <div className="mt-4">
-                <h3 className="text-sm font-medium text-gray-700 mb-2">Preview:</h3>
+                <h3 className="text-sm font-semibold text-gray-800 mb-2">Preview:</h3>
                 <div className="border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
                   <img 
                     src={URL.createObjectURL(file)} 
@@ -449,7 +448,7 @@ const SimpleFormPage = () => {
             
             {file && fileType === 'project' && (
               <div className="mt-4">
-                <h3 className="text-sm font-medium text-gray-700 mb-2">Project File:</h3>
+                <h3 className="text-sm font-semibold text-gray-800 mb-2">Project File:</h3>
                 <div className="border border-gray-200 rounded-lg p-4 bg-gray-50 flex items-center">
                   <svg className="h-8 w-8 text-gray-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -465,16 +464,17 @@ const SimpleFormPage = () => {
           
           {/* Prompt Text */}
           <div>
-            <label htmlFor="prompt_text" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="prompt_text" className="block text-sm font-semibold text-gray-800 mb-1">
               Prompt Text <span className="text-red-500">*</span>
             </label>
             <textarea
               id="prompt_text"
               name="prompt_text"
-              rows={4}
+              rows={5}
               value={formData.prompt_text}
               onChange={handleChange}
-              className={`mt-1 block w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+              required
+              className={`mt-1 block w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 ${
                 errors.prompt_text ? 'border-red-500' : 'border-gray-300'
               }`}
               placeholder="Enter the exact prompt you used to generate this project..."
@@ -485,7 +485,7 @@ const SimpleFormPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Which AI Used */}
             <div>
-              <label htmlFor="ai_used" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="ai_used" className="block text-sm font-semibold text-gray-800 mb-1">
                 AI Model <span className="text-red-500">*</span>
               </label>
               <select
@@ -493,7 +493,8 @@ const SimpleFormPage = () => {
                 name="ai_used"
                 value={formData.ai_used}
                 onChange={handleChange}
-                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                required
+                className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
               >
                 <option value="GPT-5">GPT-5</option>
                 <option value="Claude">Claude</option>
@@ -506,7 +507,7 @@ const SimpleFormPage = () => {
             
             {/* Which AI Agent Used */}
             <div>
-              <label htmlFor="ai_agent" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="ai_agent" className="block text-sm font-semibold text-gray-800 mb-1">
                 AI Tool <span className="text-red-500">*</span>
               </label>
               <input
@@ -515,7 +516,8 @@ const SimpleFormPage = () => {
                 name="ai_agent"
                 value={formData.ai_agent}
                 onChange={handleChange}
-                className={`mt-1 block w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                required
+                className={`mt-1 block w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 ${
                   errors.ai_agent ? 'border-red-500' : 'border-gray-300'
                 }`}
                 placeholder="e.g., Cursor, GitHub Copilot"
@@ -525,11 +527,11 @@ const SimpleFormPage = () => {
           </div>
           
           {/* Submit Button */}
-          <div className="pt-4">
+          <div className="pt-6">
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+              className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-lg shadow-md text-base font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-70 transition duration-200 transform hover:scale-[1.02]"
             >
               {isLoading ? (
                 <>
@@ -537,12 +539,15 @@ const SimpleFormPage = () => {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Submitting...
+                  Submitting Project...
                 </>
               ) : (
                 'Submit Project'
               )}
             </button>
+            <p className="mt-3 text-center text-sm text-gray-500">
+              All fields marked with <span className="text-red-500">*</span> are required
+            </p>
           </div>
         </form>
       </div>
