@@ -114,6 +114,9 @@ def create_app():
                 # Add headers to force download for certain file types
                 if filename.lower().endswith(('.zip', '.rar', '.7z')):
                     response.headers['Content-Disposition'] = f'attachment; filename="{filename}"'
+                else:
+                    # For images, ensure they are displayed inline
+                    response.headers['Content-Disposition'] = 'inline'
                 
                 return response
             except FileNotFoundError:

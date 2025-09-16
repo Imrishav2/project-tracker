@@ -510,7 +510,7 @@ const PublicSubmissionsPage = () => {
                       {getFileType(submission.screenshot_path) === 'screenshot' ? (
                         <div className="rounded-lg overflow-hidden border border-gray-200 mb-2">
                           <img 
-                            src={`${API_BASE}/${submission.screenshot_path}`} 
+                            src={`${API_BASE}/uploads/${submission.screenshot_path}`} 
                             alt="Project preview"
                             className="w-full h-36 object-cover transition-transform duration-300 hover:scale-105"
                             onError={(e) => {
@@ -533,7 +533,7 @@ const PublicSubmissionsPage = () => {
                             submission.additional_screenshots.slice(0, 3).map((screenshot, index) => (
                               <div key={index} className="rounded-lg overflow-hidden border border-gray-200 w-16 h-16">
                                 <img 
-                                  src={`${API_BASE}/${screenshot}`} 
+                                  src={`${API_BASE}/uploads/${screenshot}`} 
                                   alt={`Additional preview ${index + 1}`}
                                   className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                                   onError={(e) => {

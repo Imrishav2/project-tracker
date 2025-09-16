@@ -405,7 +405,7 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
                               ? (file.isPrimary ? `Primary Screenshot` : `Additional Screenshot`)
                               : (file.isPrimary ? `Primary Project ZIP File` : `Additional Project ZIP File`)}
                             <br />
-                            <span className="text-sm text-gray-500">{allFiles[currentImageIndex].path.split('/').pop().split('\\').pop()}</span>
+                            <span className="text-sm text-gray-500">{file.path.split('/').pop().split('\\').pop()}</span>
                           </span>
                         </div>
                         <a 

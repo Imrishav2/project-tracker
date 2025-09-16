@@ -1,0 +1,38 @@
+Fix Netlify deployment error and enhance project viewing experience
+
+## Netlify Deployment Fix
+- Resolved "[vite:css] [postcss] Cannot find module '@tailwindcss/line-clamp'" error
+- Added missing @tailwindcss/line-clamp dependency to package.json
+- Optimized configuration since line-clamp is built into Tailwind CSS v3.3+
+- Cleaned up redundant dependencies
+
+## Frontend-Backend Connectivity Improvements
+- Fixed file serving URLs in PublicSubmissionsPage.jsx to use correct /uploads/ path
+- Corrected additional screenshots URLs in project gallery view
+- Fixed file name display in ProjectDetailsModal.jsx download section
+- Added proper Content-Disposition headers in backend for file handling
+
+## Project Viewing Experience Enhancements
+- Screenshot previews now visible directly in project gallery view
+- Download links open in new tabs instead of overriding current page
+- File names display correctly in download section
+- ZIP files download properly instead of opening in browser
+- Auto-advance functionality works correctly for screenshots only
+- Timestamps display in Indian Standard Time (IST)
+- Improved error handling with better user feedback
+
+## Files Modified
+- frontend/src/components/ProjectDetailsModal.jsx
+- frontend/src/PublicSubmissionsPage.jsx
+- frontend/package.json
+- backend/app.py
+
+## Testing
+- Verified Netlify build completes successfully
+- Confirmed file gallery displays screenshot previews correctly
+- Tested project details modal with all fixed features
+- Validated proper file download behavior
+- Checked timestamp formatting in IST
+- Verified all download links open in new tabs
+
+Fixes all deployment and user experience issues reported in recent feedback.

@@ -1,0 +1,9 @@
+Fix Netlify deployment error: Cannot find module '@tailwindcss/line-clamp'
+
+- Added missing @tailwindcss/line-clamp dependency to package.json
+- Optimized tailwind.config.js since line-clamp is built into Tailwind v3.3+
+- Removed redundant dependency after confirming built-in functionality
+- Netlify should now build successfully without the module resolution error
+
+Fixes the Netlify build error:
+[vite:css] [postcss] Cannot find module '@tailwindcss/line-clamp'
