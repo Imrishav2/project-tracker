@@ -125,7 +125,7 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
                         </p>
                         <a 
                           href={`${API_BASE}/${allFiles[currentImageIndex].path}`} 
-                          download
+                          download={getFileType(allFiles[currentImageIndex].path) === 'project' ? true : undefined}
                           className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
                         >
                           <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -267,7 +267,7 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
                         </div>
                         <a 
                           href={`${API_BASE}/${file.path}`} 
-                          download
+                          download={getFileType(file.path) === 'project' ? true : `screenshot-${index + 1}.jpg`}
                           className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
                         >
                           Download
