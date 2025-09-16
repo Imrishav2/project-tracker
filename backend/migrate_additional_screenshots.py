@@ -52,6 +52,8 @@ if __name__ == "__main__":
     success = migrate_database()
     if success:
         logger.info("✅ Database migration completed successfully!")
+        print("Migration completed successfully")
     else:
         logger.error("❌ Database migration failed!")
+        print("Migration failed")
     sys.exit(0 if success else 1)

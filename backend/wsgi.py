@@ -1,39 +1,44 @@
-# wsgi.py - WSGI entry point for Render deployment
-import sys
+"""
+WSGI config for project tracker app.
+This module contains the WSGI application used by Gunicorn.
+"""
 import os
+import sys
 import logging
 
-# Set up logging to see errors
-logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-
-# Add current directory to Python path
+# Add the backend directory to the Python path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-# Try to import psycopg2 and handle potential issues
-try:
-    import psycopg2
-    logger.info("psycopg2 imported successfully")
-except ImportError as e:
-    logger.warning(f"psycopg2 import failed: {str(e)}")
-    try:
-        # Try alternative import
-        from psycopg2 import extensions
-        logger.info("psycopg2 imported successfully (from psycopg2.extensions)")
-    except ImportError as e2:
-        logger.error(f"psycopg2 import failed: {str(e2)}")
-        # Set a flag to indicate database issues
-        os.environ['DB_ISSUES'] = 'true'
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-try:
-    # Import and create the Flask application
-    from app import create_app
-    application = create_app()
-    logger.info("Application created successfully")
-except Exception as e:
-    logger.error(f"Error creating application: {str(e)}")
-    logger.exception("Full traceback for application creation error:")
-    raise
+def run_pre_start_checks():
+    """Run pre-start checks including database migration"""
+    try:
+        logger.info("Running pre-start checks...")
+        
+        # Import and run migration
+        from migrate_additional_screenshots import migrate_database
+        success = migrate_database()
+        if success:
+            logger.info("✅ Database migration completed successfully")
+        else:
+            logger.warning("⚠️ Database migration reported issues")
+            
+    except Exception as e:
+        logger.error(f"Error during pre-start checks: {e}")
+        # Don't fail startup on migration errors to avoid deployment loops
+        pass
+
+# Run pre-start checks
+run_pre_start_checks()
+
+# Import the app after pre-start checks
+from app import create_app
+
+# Create the application
+application = create_app()
 
 if __name__ == "__main__":
     application.run()

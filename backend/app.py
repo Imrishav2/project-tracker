@@ -80,6 +80,49 @@ def create_app():
                 'python_version': sys.version
             })
         
+        # Enhanced health check endpoint that verifies database schema
+        @app.route('/health/schema')
+        def schema_health_check():
+            if db_issues:
+                return jsonify({
+                    'status': 'unhealthy',
+                    'message': 'Database issues detected',
+                    'db_issues': True
+                }), 500
+            
+            try:
+                # Check if required columns exist in submissions table
+                from models import Submission
+                required_columns = ['additional_screenshots', 'ai_agent']
+                missing_columns = []
+                
+                # Get table info
+                inspector = db.inspect(db.engine)
+                columns = [col['name'] for col in inspector.get_columns('submissions')]
+                
+                for column in required_columns:
+                    if column not in columns:
+                        missing_columns.append(column)
+                
+                if missing_columns:
+                    return jsonify({
+                        'status': 'unhealthy',
+                        'message': f'Missing columns in submissions table: {missing_columns}',
+                        'missing_columns': missing_columns
+                    }), 500
+                else:
+                    return jsonify({
+                        'status': 'healthy',
+                        'message': 'Database schema is correct',
+                        'columns': columns
+                    })
+            except Exception as e:
+                return jsonify({
+                    'status': 'unhealthy',
+                    'message': f'Database schema check failed: {str(e)}',
+                    'error': str(e)
+                }), 500
+        
         # Debug endpoint to check environment
         @app.route('/debug/env')
         def debug_env():
@@ -122,6 +165,20 @@ def create_app():
         @app.route('/uploads/<path:filename>')
         def uploaded_file(filename):
             return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+        
+        # Serve frontend static files
+        @app.route('/')
+        def serve_frontend():
+            return send_from_directory('../static', 'index.html')
+        
+        @app.route('/<path:path>')
+        def serve_frontend_files(path):
+            # Serve static files (CSS, JS, images, etc.)
+            if os.path.exists(os.path.join('../static', path)):
+                return send_from_directory('../static', path)
+            # For all other routes, serve index.html (for client-side routing)
+            else:
+                return send_from_directory('../static', 'index.html')
         
         # Routes
         @app.route('/api/submit', methods=['POST'])

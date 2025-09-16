@@ -3,7 +3,7 @@ services:
     name: project-tracker
     env: docker
     buildCommand: "./build.sh"
-    startCommand: "cd backend && gunicorn --bind 0.0.0.0:$PORT wsgi:application"
+    startCommand: "cd backend && python verify_schema.py && gunicorn --bind 0.0.0.0:$PORT wsgi:application"
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.9

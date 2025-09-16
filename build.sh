@@ -28,6 +28,10 @@ pip install -r requirements.txt
 
 # Run database migration
 echo "Running database migration..."
-python migrate.py
+python migrate_additional_screenshots.py
+
+# Verify database schema
+echo "Verifying database schema..."
+python verify_schema.py
 
 echo "Build completed successfully!"
