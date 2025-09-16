@@ -8,25 +8,26 @@ An enterprise-ready full-stack web application for tracking and managing mandato
 - **Backend**: Python Flask with SQLAlchemy ORM
 - **Authentication**: Secure admin login with JWT tokens
 - **File Upload**: Screenshot and ZIP folder submission with validation (up to 50MB)
-- **Public Submissions Page**: Advanced dashboard with filtering, sorting, and data visualization
+- **Public Submissions Page**: Clean gallery view with search functionality
 - **Admin Dashboard**: Table view with search, filter, and sort capabilities
 - **Database**: SQLite (dev) or PostgreSQL (prod) with SQLAlchemy
 - **Deployment**: Docker support and Render/Netlify deployment configurations
 
-## Recent Enhancements
+## Recent Improvements
 
-- **Folder Upload Support**: Users can now upload entire project folders as ZIP files
-- **AI Agent Tracking**: New field to track which AI agent was used for project generation
-- **Advanced Public Dashboard**: Enhanced public submissions page with:
-  - Interactive data visualizations and charts
-  - Detailed submission modal views
-  - Improved filtering and sorting options
-  - Responsive grid and table views
-  - Analytics dashboard with time-based filtering
-- **Enhanced UI/UX**: Modern design with better spacing, typography, and visual hierarchy
-- **3D Visual Effects**: Advanced 3D components with hover effects, shine animations, and glassmorphism
-- **Professional Landing Page**: Attractive homepage with feature highlights and statistics
-- **Deployment Ready**: Properly configured for Render (backend) and Netlify (frontend)
+### Frontend Enhancements
+- **Simplified User Interface**: Clean, modern design with intuitive navigation
+- **Improved User Experience**: Enhanced form validation and clear error messaging
+- **Better Performance**: Optimized components and reduced bundle size
+- **Mobile Responsiveness**: Works seamlessly on all device sizes
+- **User-Friendly Messaging**: Clear instructions and feedback throughout the application
+
+### Backend Features
+- **Folder Upload Support**: Users can upload entire project folders as ZIP files
+- **AI Agent Tracking**: Field to track which AI agent was used for project generation
+- **Secure Authentication**: JWT-based authentication for admin access
+- **Database Flexibility**: SQLite for development, PostgreSQL for production
+- **Scalable Architecture**: Docker support for easy deployment and scaling
 
 ## Project Structure
 
@@ -45,14 +46,10 @@ project-tracker/
 │   ├── src/
 │   │   ├── App.jsx     # Main application component
 │   │   ├── FormPage.jsx # Submission form component
-│   │   ├── PublicSubmissionsPage.jsx # Public dashboard component
+│   │   ├── PublicSubmissionsPage.jsx # Public gallery component
 │   │   ├── api.js      # API utility functions
-│   │   ├── components/ # Enhanced UI components
-│   │   │   ├── EnhancedComponents.jsx # Advanced UI components
-│   │   │   ├── EnhancedUI.module.css # 3D styling and animations
-│   │   │   ├── Button3D.jsx # 3D button component
-│   │   │   ├── LandingPage.jsx # Professional landing page
-│   │   │   └── EnhancedFormPage.jsx # Enhanced form component
+│   │   ├── components/ # UI components
+│   │   │   └── LandingPage.jsx # Homepage component
 │   │   └── apiConfig.js # API configuration
 │   ├── package.json    # Node.js dependencies
 │   └── tailwind.config.js # Tailwind CSS configuration
