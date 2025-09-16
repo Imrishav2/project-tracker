@@ -264,9 +264,10 @@ def create_app():
                 
             except Exception as e:
                 logger.error(f"Error during submission: {str(e)}")
+                logger.exception("Full traceback for submission error:")
                 if not db_issues:
                     db.session.rollback()
-                return jsonify({'error': 'An error occurred while processing your submission. Please try again later.'}), 500
+                return jsonify({'error': f'An error occurred while processing your submission: {str(e)}. Please try again later.'}), 500
         
         @app.route('/api/submissions', methods=['GET'])
         @jwt_required

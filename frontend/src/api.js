@@ -7,6 +7,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 30000, // Increase timeout to 30 seconds
 });
 
 // Add a request interceptor to include auth token
@@ -58,16 +59,22 @@ export const submitForm = async (formData) => {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
+      timeout: 60000, // Increase timeout to 60 seconds for file uploads
     });
     return response.data;
   } catch (error) {
-    // Enhance error handling
-    if (error.response) {
+    // Enhanced error handling with more specific messages
+    console.error('Submission error details:', error);
+    
+    if (error.code === 'ECONNABORTED') {
+      throw new Error('Request timeout: The server took too long to respond. Please try again with a smaller file.');
+    } else if (error.response) {
       // Server responded with error status
-      throw new Error(`Server error: ${error.response.data.error || error.response.statusText}`);
+      const errorMessage = error.response.data?.error || error.response.statusText;
+      throw new Error(`Server error (${error.response.status}): ${errorMessage}`);
     } else if (error.request) {
       // Request was made but no response received
-      throw new Error('Network error: Unable to reach the server. Please check your connection.');
+      throw new Error('Network error: Unable to reach the server. Please check your connection and try again.');
     } else {
       // Something else happened
       throw new Error(`Request error: ${error.message}`);
