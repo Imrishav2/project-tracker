@@ -15,11 +15,11 @@ pip install --upgrade pip
 
 # Install psycopg2-binary first to avoid conflicts
 echo "Installing psycopg2-binary..."
-pip install psycopg2-binary==2.9.5
+pip install --no-cache-dir psycopg2-binary==2.9.5
 
 # Install other Python dependencies
 echo "Installing other dependencies..."
-pip install -r requirements.txt
+pip install --no-cache-dir -r requirements.txt
 
 # Run migration to ensure database schema is up to date
 echo "Running database migration..."

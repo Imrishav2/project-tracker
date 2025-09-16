@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import API_BASE from '../apiConfig';
 
 const ProjectDetailsModal = ({ submission, onClose }) => {
@@ -51,9 +51,36 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
     }
   };
   
+  // Handle keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      } else if (e.key === 'ArrowRight') {
+        nextImage();
+      } else if (e.key === 'ArrowLeft') {
+        prevImage();
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [allScreenshots.length]);
+  
+  // Auto-advance images every 3 seconds when there are multiple images
+  useEffect(() => {
+    if (allScreenshots.length <= 1) return;
+    
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % allScreenshots.length);
+    }, 3000);
+    
+    return () => clearInterval(interval);
+  }, [allScreenshots.length]);
+  
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           {/* Header */}
           <div className="flex justify-between items-start mb-6">
@@ -83,7 +110,7 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
                         <img 
                           src={`${API_BASE}/${allScreenshots[currentImageIndex]}`} 
                           alt={`Screenshot ${currentImageIndex + 1}`}
-                          className="w-full h-80 object-contain"
+                          className="w-full h-96 object-contain"
                         />
                       </div>
                     ) : (
@@ -163,6 +190,9 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
                   {allScreenshots.length > 1 && (
                     <div className="text-center text-sm text-gray-500">
                       {currentImageIndex + 1} of {allScreenshots.length} images
+                      <div className="mt-1 text-xs text-gray-400">
+                        Use arrow keys or click arrows to navigate
+                      </div>
                     </div>
                   )}
                 </div>
@@ -201,7 +231,7 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
                 {/* Prompt */}
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-3">Prompt Used</h3>
-                  <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="bg-gray-50 rounded-lg p-4 max-h-40 overflow-y-auto">
                     <p className="text-gray-700 whitespace-pre-wrap">{submission.prompt_text}</p>
                   </div>
                 </div>
