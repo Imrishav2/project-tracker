@@ -1,10 +1,14 @@
 # wsgi.py - WSGI entry point for Render deployment
 import sys
+import os
 import logging
 
 # Set up logging to see errors
 logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+
+# Add current directory to Python path
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 # Try to import psycopg2 and handle potential issues
 try:
@@ -20,6 +24,7 @@ except ImportError as e:
         logger.error(f"psycopg2 import failed: {str(e2)}")
 
 try:
+    # Import and create the Flask application
     from app import create_app
     application = create_app()
     logger.info("Application created successfully")

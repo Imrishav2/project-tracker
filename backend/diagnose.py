@@ -63,10 +63,17 @@ def diagnose_environment():
         logger.error(f"❌ psycopg2 import failed: {str(e)}")
         # Try importing psycopg2-binary as fallback
         try:
-            from psycopg2 import extensions
-            logger.info("✅ psycopg2 imported successfully (from psycopg2.extensions)")
+            import importlib
+            psycopg2_binary = importlib.import_module('psycopg2-binary')
+            logger.info("✅ psycopg2-binary imported successfully")
         except ImportError as e2:
-            logger.error(f"❌ psycopg2 import failed: {str(e2)}")
+            logger.error(f"❌ psycopg2-binary import failed: {str(e2)}")
+            # Try importing from psycopg2.extensions
+            try:
+                from psycopg2 import extensions
+                logger.info("✅ psycopg2 imported successfully (from psycopg2.extensions)")
+            except ImportError as e3:
+                logger.error(f"❌ psycopg2 import failed: {str(e3)}")
     
     # Try to import our modules
     logger.info("=== Application Module Check ===")

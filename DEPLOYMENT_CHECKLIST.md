@@ -1,75 +1,66 @@
 # Deployment Checklist
 
-This checklist ensures all necessary steps are completed before deploying to Render and Netlify.
+## Pre-deployment
 
-## Pre-Deployment Checks
+- [ ] Update version numbers in package.json and requirements.txt if needed
+- [ ] Run all tests locally (`npm test` for frontend, `python -m pytest` for backend)
+- [ ] Check that all environment variables are properly set
+- [ ] Verify database migrations are up to date
+- [ ] Review recent code changes for potential issues
+- [ ] Ensure all dependencies are properly listed in requirements files
 
-### Backend (Render)
-- [x] Updated psycopg2-binary version in `backend/requirements.txt`
-- [x] Added `render.yaml` to specify Python 3.11
-- [x] Added `backend/runtime.txt` to specify Python 3.11.9
-- [x] Enhanced database migration script in `backend/migrate.py`
-- [x] Updated `build.sh` to run migrations before deployment
-- [x] Tested database schema updates locally
-- [x] Verified backend API endpoints work correctly
-- [x] Tested multiple screenshot functionality
+## Backend Deployment (Render)
 
-### Frontend (Netlify)
-- [x] Verified frontend builds successfully with `npm run build`
-- [x] Tested all frontend components
-- [x] Verified multiple screenshot upload and display functionality
-- [x] Checked responsive design on different screen sizes
-- [x] Verified form validation and error handling
+- [ ] Verify Python version in render.yaml and runtime.txt match (3.11.9)
+- [ ] Check that psycopg2-binary version is 2.9.5 (compatible with Python 3.11.9)
+- [ ] Ensure build.sh has proper permissions (chmod +x)
+- [ ] Verify DATABASE_URL environment variable is set in Render dashboard
+- [ ] Check that SECRET_KEY and JWT_SECRET_KEY are properly set
+- [ ] Confirm UPLOAD_FOLDER is set correctly
 
-### General
-- [x] Updated README.md with recent improvements
-- [x] Created DEPLOYMENT_FIXES_SUMMARY.md documentation
-- [x] Verified all environment variables are properly configured
-- [x] Tested local development setup instructions
+## Frontend Deployment (Netlify)
 
-## Deployment Steps
+- [ ] Verify NODE_VERSION is set to 18 in netlify.toml
+- [ ] Check that VITE_API_URL points to the correct backend URL
+- [ ] Ensure redirects are properly configured in netlify.toml
+- [ ] Verify build command is `npm run build`
+- [ ] Confirm publish directory is set to `dist`
 
-### Render (Backend)
-1. Push all changes to the main branch
-2. Render will automatically detect the `render.yaml` file
-3. Render will use Python 3.11 as specified
-4. The `build.sh` script will run migrations
-5. The application will start with the updated schema
+## Post-deployment
 
-### Netlify (Frontend)
-1. Push all changes to the main branch
-2. Netlify will automatically build the frontend
-3. The build should complete successfully
-4. The site will be deployed with all new features
+- [ ] Monitor Render logs for any errors during build/deployment
+- [ ] Check that the backend health endpoint (/health) is responding
+- [ ] Verify that the frontend loads correctly
+- [ ] Test form submission functionality
+- [ ] Check that file uploads work correctly
+- [ ] Verify that public submissions are displayed properly
+- [ ] Test admin login and submission management
+- [ ] Confirm screenshot previews are working in gallery view
 
-## Post-Deployment Verification
+## Troubleshooting
 
-### Backend
-- [ ] Verify Render deployment completed without errors
-- [ ] Check Render logs for any warnings or errors
-- [ ] Test API endpoints using curl or Postman
-- [ ] Verify database schema is correct
-- [ ] Test multiple screenshot upload functionality
+### If deployment fails with psycopg2 errors:
+1. Check that psycopg2-binary version is 2.9.5 in requirements.txt
+2. Verify Python version is set to 3.11.9
+3. Ensure build.sh installs psycopg2-binary before other dependencies
+4. Check Render logs for specific error messages
 
-### Frontend
-- [ ] Verify Netlify deployment completed successfully
-- [ ] Test all pages load correctly
-- [ ] Test form submission with multiple screenshots
-- [ ] Verify project gallery displays correctly
-- [ ] Test project details modal with multiple screenshots
+### If frontend doesn't load properly:
+1. Check Netlify build logs for errors
+2. Verify VITE_API_URL is set correctly
+3. Confirm redirects are properly configured
+4. Check that all environment variables are set
+
+### If screenshot previews don't work:
+1. Verify file paths are stored correctly in the database
+2. Check that uploaded files are accessible via the /uploads endpoint
+3. Confirm that the frontend is correctly constructing image URLs
+4. Test image loading directly in the browser
 
 ## Rollback Plan
 
 If deployment fails:
 1. Revert to the previous working commit
-2. Identify the specific issue causing the failure
-3. Fix the issue and test locally
-4. Deploy the fix in a new commit
-
-## Monitoring
-
-After deployment:
-- [ ] Monitor Render logs for any errors
-- [ ] Monitor Netlify deployment status
-- [ ] Test the live application thoroughly
-- [ ] Verify all features work as expected
+2. Document the issue and solution
+3. Create a hotfix branch for critical issues
+4. Test the fix thoroughly before redeploying
