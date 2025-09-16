@@ -22,7 +22,7 @@ def diagnose_environment():
     
     # Check environment variables
     logger.info("=== Environment Variables ===")
-    env_vars = ['DATABASE_URL', 'SECRET_KEY', 'JWT_SECRET_KEY', 'UPLOAD_FOLDER', 'PYTHONPATH']
+    env_vars = ['DATABASE_URL', 'SECRET_KEY', 'JWT_SECRET_KEY', 'UPLOAD_FOLDER', 'PYTHONPATH', 'DB_ISSUES']
     for var in env_vars:
         value = os.environ.get(var, 'NOT SET')
         # Mask sensitive values
@@ -118,6 +118,31 @@ def diagnose_environment():
         logger.error(f"❌ Database connection failed: {str(e)}")
         logger.exception("Full traceback:")
         return False
+    
+    # Test database schema
+    logger.info("=== Database Schema Test ===")
+    try:
+        app = create_app()
+        with app.app_context():
+            from models import db
+            # Try to get table info
+            try:
+                inspector = db.inspect(db.engine)
+                tables = inspector.get_table_names()
+                logger.info(f"✅ Database tables: {tables}")
+                
+                # Check if submissions table exists
+                if 'submissions' in tables:
+                    columns = inspector.get_columns('submissions')
+                    column_names = [col['name'] for col in columns]
+                    logger.info(f"✅ Submissions table columns: {column_names}")
+                else:
+                    logger.warning("⚠️  Submissions table not found")
+            except Exception as e:
+                logger.warning(f"⚠️  Database schema inspection failed: {str(e)}")
+    except Exception as e:
+        logger.error(f"❌ Database schema test failed: {str(e)}")
+        logger.exception("Full traceback:")
     
     return True
 

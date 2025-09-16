@@ -73,7 +73,12 @@ def create_app():
         # Health check endpoint
         @app.route('/health')
         def health_check():
-            return jsonify({'status': 'healthy', 'timestamp': datetime.now().isoformat()})
+            return jsonify({
+                'status': 'healthy', 
+                'timestamp': datetime.now().isoformat(),
+                'db_issues': db_issues,
+                'python_version': sys.version
+            })
         
         # Debug endpoint to check environment
         @app.route('/debug/env')
@@ -82,9 +87,36 @@ def create_app():
                 'python_version': sys.version,
                 'database_url': os.environ.get('DATABASE_URL', 'Not set'),
                 'db_issues': os.environ.get('DB_ISSUES', 'Not set'),
-                'upload_folder': app.config['UPLOAD_FOLDER']
+                'upload_folder': app.config['UPLOAD_FOLDER'],
+                'sqlalchemy_uri': app.config.get('SQLALCHEMY_DATABASE_URI', 'Not set')
             }
             return jsonify(env_info)
+        
+        # Database health check endpoint
+        @app.route('/health/db')
+        def db_health_check():
+            if db_issues:
+                return jsonify({
+                    'status': 'unhealthy',
+                    'message': 'Database issues detected',
+                    'db_issues': True
+                }), 500
+            
+            try:
+                # Try to execute a simple query
+                from models import db
+                db.session.execute(db.text('SELECT 1'))
+                return jsonify({
+                    'status': 'healthy',
+                    'message': 'Database connection successful',
+                    'db_issues': False
+                })
+            except Exception as e:
+                return jsonify({
+                    'status': 'unhealthy',
+                    'message': f'Database connection failed: {str(e)}',
+                    'db_issues': True
+                }), 500
         
         # Serve uploaded files
         @app.route('/uploads/<path:filename>')
@@ -320,7 +352,8 @@ def create_app():
                 
             except Exception as e:
                 logger.error(f"Error retrieving submissions: {str(e)}")
-                return jsonify({'error': 'An error occurred while retrieving submissions. Please try again later.'}), 500
+                logger.exception("Full traceback for submissions error:")
+                return jsonify({'error': f'An error occurred while retrieving submissions: {str(e)}. Please try again later.'}), 500
         
         @app.route('/api/public/submissions', methods=['GET'])
         def get_public_submissions():
@@ -405,7 +438,8 @@ def create_app():
                 
             except Exception as e:
                 logger.error(f"Error retrieving public submissions: {str(e)}")
-                return jsonify({'error': 'An error occurred while retrieving submissions. Please try again later.'}), 500
+                logger.exception("Full traceback for public submissions error:")
+                return jsonify({'error': f'An error occurred while retrieving submissions: {str(e)}. Please try again later.'}), 500
         
         # Create tables
         with app.app_context():
@@ -417,6 +451,7 @@ def create_app():
                     logger.info("Database tables created successfully")
                 except Exception as e:
                     logger.error(f"Error creating database tables: {str(e)}")
+                    logger.exception("Full traceback for database table creation error:")
                     # Try to add missing columns if tables already exist
                     try:
                         # For SQLite and PostgreSQL, try to add columns if they don't exist
@@ -426,20 +461,21 @@ def create_app():
                         try:
                             db.session.execute(text("ALTER TABLE submissions ADD COLUMN ai_agent VARCHAR(50)"))
                             logger.info("Added ai_agent column to submissions table")
-                        except Exception:
-                            logger.info("ai_agent column already exists or not needed")
+                        except Exception as alter_e:
+                            logger.info(f"ai_agent column already exists or not needed: {str(alter_e)}")
                         
                         # Try to add additional_screenshots column
                         try:
                             db.session.execute(text("ALTER TABLE submissions ADD COLUMN additional_screenshots TEXT"))
                             logger.info("Added additional_screenshots column to submissions table")
-                        except Exception:
-                            logger.info("additional_screenshots column already exists or not needed")
+                        except Exception as alter_e2:
+                            logger.info(f"additional_screenshots column already exists or not needed: {str(alter_e2)}")
                         
                         db.session.commit()
                         logger.info("Database schema updated successfully")
                     except Exception as e2:
                         logger.error(f"Error updating database schema: {str(e2)}")
+                        logger.exception("Full traceback for database schema update error:")
                         raise e2 from e
             else:
                 logger.warning("Skipping database initialization due to database issues")

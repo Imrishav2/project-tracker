@@ -32,23 +32,8 @@ try:
     logger.info("Application created successfully")
 except Exception as e:
     logger.error(f"Error creating application: {str(e)}")
-    logger.exception("Full traceback:")
-    # Create a minimal application for debugging
-    from flask import Flask
-    application = Flask(__name__)
-    
-    @application.route('/')
-    def health_check():
-        return "Application is running but there may be database connection issues"
-    
-    @application.route('/debug')
-    def debug_info():
-        import subprocess
-        try:
-            result = subprocess.run(['pip', 'freeze'], capture_output=True, text=True)
-            return f"<pre>{result.stdout}</pre>"
-        except Exception as e:
-            return f"Error getting pip freeze: {str(e)}"
+    logger.exception("Full traceback for application creation error:")
+    raise
 
 if __name__ == "__main__":
     application.run()
