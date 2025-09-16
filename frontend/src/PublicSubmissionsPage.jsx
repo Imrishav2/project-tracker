@@ -165,6 +165,12 @@ const PublicSubmissionsPage = () => {
     setSelectedSubmission(null);
   };
 
+  // Extract filename from path (handles both Windows and Unix paths)
+  const getFilenameFromPath = (path) => {
+    if (!path) return '';
+    return path.split(/[\/\\]/).pop();
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Project Details Modal */}
@@ -525,7 +531,7 @@ const PublicSubmissionsPage = () => {
                       {getFileType(submission.screenshot_path) === 'screenshot' ? (
                         <div className="rounded-lg overflow-hidden border border-gray-200 mb-2">
                           <img 
-                            src={`${API_BASE}/uploads/${submission.screenshot_path}`} 
+                            src={`${API_BASE}/uploads/${getFilenameFromPath(submission.screenshot_path)}`} 
                             alt="Project preview"
                             className="w-full h-36 object-cover transition-transform duration-300 hover:scale-105"
                             onError={(e) => {
@@ -549,7 +555,7 @@ const PublicSubmissionsPage = () => {
                             submission.additional_screenshots.slice(0, 3).map((screenshot, index) => (
                               <div key={index} className="rounded-lg overflow-hidden border border-gray-200 w-16 h-16">
                                 <img 
-                                  src={`${API_BASE}/uploads/${screenshot}`} 
+                                  src={`${API_BASE}/uploads/${getFilenameFromPath(screenshot)}`} 
                                   alt={`Additional preview ${index + 1}`}
                                   className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                                   onError={(e) => {

@@ -48,10 +48,17 @@ def create_app():
                 logger.info("Using SQLite database for development")
         
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-        app.config['UPLOAD_FOLDER'] = os.environ.get('UPLOAD_FOLDER', 'uploads')
+        # Fix the upload folder path to be an absolute path
+        backend_dir = os.path.dirname(os.path.abspath(__file__))
+        upload_folder_name = os.environ.get('UPLOAD_FOLDER', 'uploads')
+        # Use absolute path for upload folder
+        app.config['UPLOAD_FOLDER'] = os.path.abspath(os.path.join(backend_dir, upload_folder_name))
         app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max file size (increased for project files)
         
         logger.info(f"Database URL: {app.config.get('SQLALCHEMY_DATABASE_URI', 'Not set')}")
+        logger.info(f"Upload folder path: {app.config['UPLOAD_FOLDER']}")
+        logger.info(f"Backend directory: {backend_dir}")
+        logger.info(f"Upload folder exists: {os.path.exists(app.config['UPLOAD_FOLDER'])}")
         
         # Initialize extensions
         try:
@@ -209,6 +216,16 @@ def create_app():
             }
             return jsonify(env_info)
         
+        # Simple test endpoint for logging
+        @app.route('/debug/test-logging')
+        def test_logging():
+            logger.info("=== TEST LOGGING ENDPOINT CALLED ===")
+            logger.info("This is a test log message")
+            logger.info(f"Upload folder: {app.config['UPLOAD_FOLDER']}")
+            logger.info(f"Upload folder exists: {os.path.exists(app.config['UPLOAD_FOLDER'])}")
+            logger.info("=== TEST LOGGING ENDPOINT COMPLETED ===")
+            return jsonify({"message": "Test logging completed"})
+        
         # Database recreation endpoint (FOR DEBUGGING ONLY)
         @app.route('/debug/recreate-db', methods=['POST'])
         def recreate_db():
@@ -263,24 +280,34 @@ def create_app():
         # Routes
         @app.route('/api/submit', methods=['POST'])
         def submit_form():
+            print("=== SUBMISSION ENDPOINT CALLED ===")
+            logger.info("=== SUBMISSION ENDPOINT CALLED ===")
             try:
+                logger.info("Received submission request")
+                logger.info(f"Request form data: {request.form}")
+                logger.info(f"Request files: {list(request.files.keys())}")
+                
                 # Validate required fields
                 required_fields = ['lumen_name', 'prompt_text', 'ai_used', 'ai_agent', 'reward_amount']
                 for field in required_fields:
                     if field not in request.form or not request.form[field].strip():
+                        logger.info(f"Missing required field: {field}")
                         return jsonify({'error': f'{field} is required'}), 400
                 
                 # Validate reward amount
                 try:
                     reward_amount = float(request.form['reward_amount'])
                     if reward_amount < 0.01:
+                        logger.info("Invalid reward amount")
                         return jsonify({'error': 'Reward amount must be at least 0.01'}), 400
                 except ValueError:
+                    logger.info("Invalid reward amount format")
                     return jsonify({'error': 'Invalid reward amount'}), 400
                 
                 # Validate AI used
                 valid_ai_options = ['GPT-5', 'Claude', 'LLaMA', 'Gemini', 'Perplexity', 'Other']
                 if request.form['ai_used'] not in valid_ai_options:
+                    logger.info("Invalid AI option selected")
                     return jsonify({'error': 'Invalid AI option selected'}), 400
                 
                 # Handle file upload - check for both screenshot and project files
@@ -290,14 +317,20 @@ def create_app():
                 if 'screenshot' in request.files and request.files['screenshot'].filename != '':
                     file = request.files['screenshot']
                     file_type = 'screenshot'
+                    logger.info("Screenshot file found")
                 elif 'project' in request.files and request.files['project'].filename != '':
                     file = request.files['project']
                     file_type = 'project'
+                    logger.info("Project file found")
                 else:
+                    logger.info("No file found in request")
                     return jsonify({'error': 'Either a screenshot or project file is required'}), 400
                 
                 if not file or not file.filename:
+                    logger.info("File is empty or has no filename")
                     return jsonify({'error': 'No file selected'}), 400
+                
+                logger.info(f"File details - filename: {file.filename}, content_type: {file.content_type}")
                 
                 # Validate file based on type
                 if file_type == 'screenshot':
@@ -306,27 +339,33 @@ def create_app():
                     
                     # Check if filename contains extension
                     if '.' not in file.filename:
+                        logger.info("Screenshot file has no extension")
                         return jsonify({'error': 'Invalid file type. Only .jpg, .jpeg, .png files allowed'}), 400
                     
                     file_ext = file.filename.rsplit('.', 1)[1].lower()
                     if file_ext not in allowed_extensions:
+                        logger.info(f"Screenshot file has invalid extension: {file_ext}")
                         return jsonify({'error': 'Invalid file type. Only .jpg, .jpeg, .png files allowed'}), 400
                     
                     # Additional security check for file content
                     if file.content_type not in ['image/png', 'image/jpeg']:
+                        logger.info(f"Screenshot file has invalid content type: {file.content_type}")
                         return jsonify({'error': 'Invalid file content type'}), 400
                 else:  # project file
                     # Validate project file type (zip)
                     allowed_extensions = {'zip'}
                     if '.' not in file.filename:
+                        logger.info("Project file has no extension")
                         return jsonify({'error': 'Invalid file type. Only .zip files allowed'}), 400
                     
                     file_ext = file.filename.rsplit('.', 1)[1].lower()
                     if file_ext not in allowed_extensions:
+                        logger.info(f"Project file has invalid extension: {file_ext}")
                         return jsonify({'error': 'Invalid file type. Only .zip files allowed'}), 400
                     
                     # Additional security check for file content
                     if file.content_type not in ['application/zip', 'application/x-zip-compressed']:
+                        logger.info(f"Project file has invalid content type: {file.content_type}")
                         return jsonify({'error': 'Invalid file content type. Only ZIP files are allowed'}), 400
                 
                 # Save primary file securely
@@ -341,7 +380,38 @@ def create_app():
                 
                 # Ensure the upload directory exists
                 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-                file.save(file_path)
+                logger.info(f"=== FILE SAVING PROCESS ===")
+                logger.info(f"Saving file to: {file_path}")
+                logger.info(f"Upload folder: {app.config['UPLOAD_FOLDER']}")
+                logger.info(f"Upload folder exists: {os.path.exists(app.config['UPLOAD_FOLDER'])}")
+                logger.info(f"Current working directory: {os.getcwd()}")
+                logger.info(f"File object: {file}")
+                logger.info(f"File filename: {file.filename}")
+                
+                try:
+                    file.save(file_path)
+                    logger.info(f"File saved successfully: {file_path}")
+                except Exception as e:
+                    logger.error(f"Error saving file: {str(e)}")
+                    logger.exception("Full traceback for file saving error:")
+                    return jsonify({'error': f'Error saving file: {str(e)}'}), 500
+                
+                # Verify file was saved
+                if os.path.exists(file_path):
+                    logger.info(f"File verification successful: {file_path}")
+                    # Check file size
+                    file_size = os.path.getsize(file_path)
+                    logger.info(f"File size: {file_size} bytes")
+                else:
+                    logger.error(f"File verification failed: {file_path}")
+                    # List files in upload folder
+                    try:
+                        files_in_upload = os.listdir(app.config['UPLOAD_FOLDER'])
+                        logger.info(f"Files in upload folder: {files_in_upload}")
+                    except Exception as e:
+                        logger.error(f"Error listing files in upload folder: {str(e)}")
+                
+                logger.info(f"=== FILE SAVING PROCESS COMPLETED ===")
                 
                 # Handle additional screenshots
                 additional_screenshot_paths = []
@@ -354,14 +424,17 @@ def create_app():
                             
                             # Check if filename contains extension
                             if '.' not in additional_file.filename:
+                                logger.info(f"Additional screenshot {i} has no extension, skipping")
                                 continue  # Skip invalid files
                             
                             file_ext = additional_file.filename.rsplit('.', 1)[1].lower()
                             if file_ext not in allowed_extensions:
+                                logger.info(f"Additional screenshot {i} has invalid extension: {file_ext}, skipping")
                                 continue  # Skip invalid files
                             
                             # Additional security check for file content
                             if additional_file.content_type not in ['image/png', 'image/jpeg']:
+                                logger.info(f"Additional screenshot {i} has invalid content type: {additional_file.content_type}, skipping")
                                 continue  # Skip invalid files
                             
                             # Save additional screenshot
@@ -373,6 +446,7 @@ def create_app():
                             additional_file_path = os.path.join(app.config['UPLOAD_FOLDER'], additional_filename)
                             additional_file.save(additional_file_path)
                             additional_screenshot_paths.append(additional_filename)  # Store just the filename
+                            logger.info(f"Additional screenshot {i} saved: {additional_file_path}")
                 
                 # Create submission record with relative path for security
                 submission = Submission()
@@ -381,13 +455,13 @@ def create_app():
                 submission.ai_used = request.form['ai_used']
                 submission.ai_agent = request.form['ai_agent']  # Add AI agent field
                 submission.reward_amount = reward_amount
-                # Store relative path instead of absolute path
-                submission.screenshot_path = filename  # Just the filename, not the full path
-                # Store additional screenshots as comma-separated paths
+                # Store just the filename, not the full path
+                submission.screenshot_path = filename
+                # Store additional screenshots as comma-separated filenames
                 if additional_screenshot_paths:
-                    # Extract just the filenames
-                    additional_filenames = [os.path.basename(path) for path in additional_screenshot_paths]
-                    submission.additional_screenshots = ','.join(additional_filenames)
+                    submission.additional_screenshots = ','.join(additional_screenshot_paths)
+                else:
+                    submission.additional_screenshots = None
                 
                 # Only try to save to database if database is working
                 if not db_issues:
@@ -395,6 +469,8 @@ def create_app():
                     db.session.commit()
                 
                 logger.info(f"New submission received from {request.form['lumen_name']} with {file_type}")
+                logger.info("=== SUBMISSION PROCESS COMPLETED SUCCESSFULLY ===")
+                print("=== SUBMISSION PROCESS COMPLETED SUCCESSFULLY ===")
                 
                 return jsonify({
                     'message': '✅ Submission received. You are responsible for accuracy of details.',

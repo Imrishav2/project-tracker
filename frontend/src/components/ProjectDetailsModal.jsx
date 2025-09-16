@@ -31,9 +31,14 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
       return 'project';
     }
     
-    // Fallback to filename content check
-    if (filename.includes('screenshot')) return 'screenshot';
-    if (filename.includes('project')) return 'project';
+    // Fallback to filename content check - look for file type indicators in the filename
+    if (filename.includes('screenshot') || filename.includes('image')) return 'screenshot';
+    if (filename.includes('project') || filename.includes('zip')) return 'project';
+    
+    // If we can't determine the type, default to screenshot for image-like files
+    // or project for archive-like files
+    if (filename.match(/\.(png|jpg|jpeg|gif|bmp|webp)$/i)) return 'screenshot';
+    if (filename.match(/\.(zip|rar|7z|tar|gz)$/i)) return 'project';
     
     return 'file';
   };
@@ -91,7 +96,7 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
         }
       }
     } else if (allFiles.length > 1) {
-      // If current file is not a screenshot or no screenshots, move to next file
+      // If current file is not a screenshot or no screenshots, move to next file in all files
       setCurrentImageIndex((prevIndex) => (prevIndex + 1) % allFiles.length);
     }
   };
@@ -115,7 +120,7 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
         }
       }
     } else if (allFiles.length > 1) {
-      // If current file is not a screenshot or no screenshots, move to previous file
+      // If current file is not a screenshot or no screenshots, move to previous file in all files
       setCurrentImageIndex((prevIndex) => (prevIndex - 1 + allFiles.length) % allFiles.length);
     }
   };
@@ -318,7 +323,9 @@ const ProjectDetailsModal = ({ submission, onClose }) => {
                               <svg className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                               </svg>
-                              <span className="text-xs text-gray-500 mt-1">ZIP</span>
+                              <span className="text-xs text-gray-500 mt-1">
+                                {getFileType(file.path) === 'project' ? 'ZIP' : 'File'}
+                              </span>
                             </div>
                           )}
                         </button>
