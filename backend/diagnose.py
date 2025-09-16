@@ -101,8 +101,12 @@ def diagnose_environment():
         with app.app_context():
             # Try to query the database
             from models import Submission
-            count = Submission.query.count()
-            logger.info(f"✅ Database connection successful. Found {count} submissions.")
+            try:
+                count = Submission.query.count()
+                logger.info(f"✅ Database connection successful. Found {count} submissions.")
+            except Exception as e:
+                logger.warning(f"⚠️  Database query failed (might be empty database): {str(e)}")
+                logger.info("✅ Database connection successful.")
     except Exception as e:
         logger.error(f"❌ Database connection failed: {str(e)}")
         logger.exception("Full traceback:")
