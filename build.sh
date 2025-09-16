@@ -26,8 +26,4 @@ mkdir -p uploads
 echo "Installing Python dependencies..."
 pip install -r requirements.txt
 
-# Run force database migration
-echo "Running force database migration..."
-python force_migration.py
-
 echo "Build completed successfully!"

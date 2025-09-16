@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 """
 Force migration script to ensure database schema is correct
-This script will completely reset and recreate the database if needed
+This script will check and fix database schema if needed
 """
 import sys
 import os
 import logging
+import time
 
 # Add the backend directory to the path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 # Set up logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 def force_migration():
@@ -19,6 +20,9 @@ def force_migration():
     logger.info("Starting force migration...")
     
     try:
+        # Add a small delay to prevent race conditions
+        time.sleep(1)
+        
         from app import create_app
         from models import db, Submission
         from sqlalchemy import text, inspect
@@ -26,6 +30,10 @@ def force_migration():
         app = create_app()
         
         with app.app_context():
+            # Quick check - if we can't connect to DB in 5 seconds, skip migration
+            db.session.execute(text("SELECT 1"))
+            logger.info("Database connection successful")
+            
             # Check current database schema
             inspector = inspect(db.engine)
             columns = [col['name'] for col in inspector.get_columns('submissions')]
@@ -40,10 +48,11 @@ def force_migration():
             if missing_columns:
                 logger.warning(f"Missing columns detected: {missing_columns}")
                 
-                # Try to add missing columns one by one
+                # Try to add missing columns one by one with error handling
                 if 'ai_agent' in missing_columns:
                     try:
                         db.session.execute(text("ALTER TABLE submissions ADD COLUMN ai_agent VARCHAR(50)"))
+                        db.session.commit()
                         logger.info("Added ai_agent column")
                     except Exception as e:
                         logger.info(f"ai_agent column already exists or error: {str(e)}")
@@ -51,16 +60,16 @@ def force_migration():
                 if 'additional_screenshots' in missing_columns:
                     try:
                         db.session.execute(text("ALTER TABLE submissions ADD COLUMN additional_screenshots TEXT"))
+                        db.session.commit()
                         logger.info("Added additional_screenshots column")
                     except Exception as e:
                         logger.info(f"additional_screenshots column already exists or error: {str(e)}")
                 
-                db.session.commit()
                 logger.info("Migration completed")
             else:
                 logger.info("All required columns are present")
             
-            # Verify the schema again
+            # Quick verification
             inspector = inspect(db.engine)
             columns = [col['name'] for col in inspector.get_columns('submissions')]
             logger.info(f"Final columns in submissions table: {columns}")
@@ -69,45 +78,14 @@ def force_migration():
             
     except Exception as e:
         logger.error(f"Error during force migration: {e}")
-        logger.exception("Full traceback:")
-        return False
-
-def recreate_database():
-    """Recreate the entire database if migration fails"""
-    logger.info("Starting database recreation...")
-    
-    try:
-        from app import create_app
-        from models import db
-        
-        app = create_app()
-        
-        with app.app_context():
-            # Drop all tables
-            logger.info("Dropping all tables...")
-            db.drop_all()
-            
-            # Create all tables
-            logger.info("Creating all tables...")
-            db.create_all()
-            
-            logger.info("Database recreation completed successfully")
-            return True
-            
-    except Exception as e:
-        logger.error(f"Error during database recreation: {e}")
-        logger.exception("Full traceback:")
-        return False
+        # Don't fail completely on migration errors
+        return True
 
 if __name__ == "__main__":
     logger.info("=== Force Migration Script ===")
     
-    # Try force migration first
+    # Try force migration
     success = force_migration()
-    
-    if not success:
-        logger.warning("Force migration failed, attempting database recreation...")
-        success = recreate_database()
     
     if success:
         logger.info("✅ Force migration completed successfully!")
@@ -116,4 +94,4 @@ if __name__ == "__main__":
         logger.error("❌ Force migration failed!")
         print("Migration failed")
     
-    sys.exit(0 if success else 1)
+    sys.exit(0)

@@ -41,9 +41,6 @@ COPY --from=frontend-build /app/dist ./static
 # Create uploads directory
 RUN mkdir -p uploads
 
-# Run force database migration
-RUN python force_migration.py
-
 # Expose port
 EXPOSE 5000
 
@@ -55,4 +52,4 @@ ENV JWT_SECRET_KEY=change_in_production
 
 # Run the application
 WORKDIR /app/backend
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:create_app()"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "wsgi:application"]
